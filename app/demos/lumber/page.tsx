@@ -22,6 +22,8 @@ interface ChartSpec {
   color_col?: string;
   labels?: Record<string, string>;
   columns?: string[];
+  drill_key?: string;      // data key whose value substitutes into drill_question
+  drill_question?: string; // template: "Show me top products in {category}"
 }
 
 interface Message {
@@ -84,12 +86,34 @@ const fmt = (v: unknown): string => {
 
 // ── chart component ───────────────────────────────────────────────────────────
 
-function Chart({ data, spec }: { data: Record<string, unknown>[]; spec: ChartSpec }) {
+function Chart({
+  data, spec, onDrillDown,
+}: {
+  data: Record<string, unknown>[];
+  spec: ChartSpec;
+  onDrillDown?: (question: string) => void;
+}) {
   if (!data || data.length === 0) return null;
 
   const xKey = spec.x ?? "";
   const yKey = spec.y ?? "";
   const label = (k: string) => spec.labels?.[k] ?? k.replace(/_/g, " ");
+
+  // Build a drill-down question by substituting the clicked value into the template
+  const drillQuestion = (row: Record<string, unknown>): string | null => {
+    if (!spec.drill_question || !spec.drill_key) return null;
+    const val = String(row[spec.drill_key] ?? "");
+    return spec.drill_question.replace(`{${spec.drill_key}}`, val);
+  };
+
+  const drillProps = (row: Record<string, unknown>) => {
+    const q = drillQuestion(row);
+    if (!q || !onDrillDown) return {};
+    return {
+      style: { cursor: "pointer" },
+      onClick: () => onDrillDown(q),
+    };
+  };
 
   if (spec.type === "bar") {
     return (
@@ -149,15 +173,21 @@ function Chart({ data, spec }: { data: Record<string, unknown>[]; spec: ChartSpe
   if (spec.type === "pie") {
     const nameKey = spec.names ?? xKey;
     const valueKey = spec.values ?? yKey;
+    const hasDrill = !!(spec.drill_question && spec.drill_key && onDrillDown);
     return (
       <div className="mt-3 h-56">
+        {hasDrill && (
+          <p className="text-xs text-ink-subtle text-center mb-1">Click a segment to drill down</p>
+        )}
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie data={data} dataKey={valueKey} nameKey={nameKey}
-              cx="50%" cy="50%" outerRadius={88} label={({ name, percent }) =>
-                `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
-              } labelLine={false}>
-              {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+              cx="50%" cy="50%" outerRadius={88}
+              label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+              labelLine={false}>
+              {data.map((row, i) => (
+                <Cell key={i} fill={COLORS[i % COLORS.length]} {...drillProps(row)} />
+              ))}
             </Pie>
             <Tooltip formatter={(v) => fmt(v)} />
           </PieChart>
@@ -368,7 +398,11 @@ export default function LumberDemoPage() {
                     {/* Chart — falls back to table for 'table' type or unrecognised specs */}
                     {msg.chart_data && msg.chart_spec && (
                       <>
-                        <Chart data={msg.chart_data} spec={msg.chart_spec} />
+                        <Chart
+                          data={msg.chart_data}
+                          spec={msg.chart_spec}
+                          onDrillDown={sendQuestion}
+                        />
                         {["table", "scatter"].includes(msg.chart_spec.type) && (
                           <DataTable data={msg.chart_data} spec={msg.chart_spec} />
                         )}
