@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Tag } from "@/components/ui/Tag";
 import { Button } from "@/components/ui/Button";
@@ -19,6 +20,7 @@ interface Project {
   tags: string[];
   status: ProjectStatus;
   href?: string;
+  demoLabel?: string;
 }
 
 const STATUS_STYLES: Record<ProjectStatus, string> = {
@@ -37,6 +39,8 @@ const PROJECTS: Project[] = [
       "Ingests data from POS, inventory management, and QuickBooks into a unified data warehouse on AWS. A dbt-modeled semantic layer drives dashboards covering margin by product line, inventory turnover, customer behavior, and sales rep performance. A LangChain-powered query layer enables natural language querying against the semantic model, not the raw tables.",
     tags: ["dbt", "BigQuery", "LangChain", "Next.js", "Python", "TypeScript"],
     status: "In Progress",
+    href: "/demos/lumber",
+    demoLabel: "Try the demo →",
   },
   {
     title: "Enterprise Agentic AI Readiness",
@@ -98,10 +102,20 @@ export default function WorkPage() {
               {project.detail}
             </p>
 
-            <div className="flex flex-wrap gap-2">
-              {project.tags.map((tag) => (
-                <Tag key={tag} label={tag} />
-              ))}
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-wrap gap-2">
+                {project.tags.map((tag) => (
+                  <Tag key={tag} label={tag} />
+                ))}
+              </div>
+              {project.href && project.demoLabel && (
+                <Link
+                  href={project.href}
+                  className="text-sm font-medium text-accent hover:underline shrink-0"
+                >
+                  {project.demoLabel}
+                </Link>
+              )}
             </div>
           </article>
         ))}

@@ -25,7 +25,7 @@ const PROJECTS = [
     tags: ["Python", "Anthropic", "SQLite", "Streamlit"],
     status: "Live",
     statusStyle: "bg-green-50 text-green-700 border-green-200",
-    href: "/work",
+    href: "/demos/lumber",
   },
   {
     title: "Enterprise Agentic AI Readiness",
