@@ -117,7 +117,7 @@ function Chart({
 
   if (spec.type === "bar") {
     return (
-      <div className="mt-3 h-56">
+      <div className="mt-3 h-80">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
@@ -133,7 +133,7 @@ function Chart({
 
   if (spec.type === "horizontal_bar") {
     return (
-      <div className="mt-3 h-56">
+      <div className="mt-3 h-80">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical" margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" horizontal={false} />
@@ -152,7 +152,7 @@ function Chart({
       ? Object.keys(data[0] ?? {}).filter((k) => k !== xKey)
       : [yKey];
     return (
-      <div className="mt-3 h-56">
+      <div className="mt-3 h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
@@ -175,7 +175,7 @@ function Chart({
     const valueKey = spec.values ?? yKey;
     const hasDrill = !!(spec.drill_question && spec.drill_key && onDrillDown);
     return (
-      <div className="mt-3 h-56">
+      <div className="mt-3 h-80">
         {hasDrill && (
           <p className="text-xs text-ink-subtle text-center mb-1">Click a segment to drill down</p>
         )}
@@ -225,13 +225,13 @@ function DataTable({
 
   return (
     <div className="mt-3 overflow-x-auto rounded-lg border border-surface-3">
-      <table className="w-full text-xs">
+      <table className="w-full text-sm">
         <thead>
           <tr className="bg-surface-1 border-b border-surface-3">
             {cols.map((col) => (
               <th
                 key={col}
-                className="px-3 py-2 text-left font-semibold text-ink-muted capitalize"
+                className="px-4 py-3 text-left font-semibold text-ink-muted capitalize"
               >
                 {label(col)}
               </th>
@@ -239,13 +239,13 @@ function DataTable({
           </tr>
         </thead>
         <tbody>
-          {data.slice(0, 12).map((row, i) => (
+          {data.slice(0, 15).map((row, i) => (
             <tr
               key={i}
               className={i % 2 === 0 ? "bg-white" : "bg-surface-1"}
             >
               {cols.map((col) => (
-                <td key={col} className="px-3 py-2 text-ink-muted">
+                <td key={col} className="px-4 py-3 text-ink-muted">
                   {fmt(row[col])}
                 </td>
               ))}
@@ -253,9 +253,9 @@ function DataTable({
           ))}
         </tbody>
       </table>
-      {data.length > 12 && (
-        <p className="px-3 py-2 text-xs text-ink-subtle bg-surface-1 border-t border-surface-3">
-          Showing 12 of {data.length} rows
+      {data.length > 15 && (
+        <p className="px-4 py-2 text-xs text-ink-subtle bg-surface-1 border-t border-surface-3">
+          Showing 15 of {data.length} rows
         </p>
       )}
     </div>
