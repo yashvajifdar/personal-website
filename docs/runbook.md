@@ -138,17 +138,17 @@ registration + DNS.
 The `/demos/lumber` page requires a running FastAPI backend. Without it, the page shows
 a friendly "check back soon" message — so it is always safe to deploy.
 
-### Deploy the backend (Railway)
+### Deploy the backend (Render — free, auto-sleeps when idle)
 
-See `lumber-ai-analytics/docs/runbook.md` section 9 for full Railway deploy steps.
-The deployed URL looks like `https://lumber-ai-XXXXX.up.railway.app`.
+See `lumber-ai-analytics/docs/runbook.md` section 9 for full Render deploy steps.
+The deployed URL looks like `https://lumber-ai-analytics.onrender.com`.
 
 ### Connect backend to Vercel
 
 1. Go to [vercel.com](https://vercel.com) → `personal-website` → **Settings → Environment Variables**
 2. Add:
    - Name: `LUMBER_API_URL`
-   - Value: `https://lumber-ai-XXXXX.up.railway.app`
+   - Value: `https://lumber-ai-analytics.onrender.com`
    - Environment: Production (and Preview if you want it in preview deploys too)
 3. Click **Save**
 4. Redeploy: go to **Deployments** → latest → **Redeploy** (or just push a commit to `main`)
@@ -224,9 +224,9 @@ If that works, the issue is DNS, not the app.
 The backend is not configured or is down. Check:
 
 1. Is `LUMBER_API_URL` set in Vercel environment variables?
-2. Is the Railway/Render app running? Visit `$LUMBER_API_URL/health` directly.
-3. Did the free-tier app go to sleep? Railway free tier apps sleep after inactivity — the
-   first request after sleep takes 20–30 seconds to wake up.
+2. Is the Render app running? Visit `$LUMBER_API_URL/health` directly.
+3. Is Render waking from sleep? The first request after 15 min idle takes 30–60 seconds
+   — wait and retry. Subsequent requests are fast.
 
 **Symptom: 502 Bad Gateway from the demo**
 The proxy reached the backend but got an error. Check Railway logs for the Python traceback.

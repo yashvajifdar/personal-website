@@ -131,5 +131,5 @@ Plotly as a browser dependency.
 | Contact | mailto | Form service | Ship fast — upgrade when it matters |
 | Analytics | None (for now) | Google Analytics | Privacy, no cookies, ship fast |
 | Lumber demo frontend | Next.js page | Streamlit embed | Consistent design language, no iframe |
-| Lumber demo backend | FastAPI on Railway | Rewrite in TypeScript | Keep business logic in Python |
+| Lumber demo backend | FastAPI on Render (free, auto-sleeps) | Railway (always-on, costs money); rewrite in TS | Render free tier sleeps after 15 min idle — no always-on cost |
 | Lumber demo proxy | Next.js API route | Direct browser fetch | Hide backend URL, avoid CORS |
