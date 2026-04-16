@@ -269,7 +269,17 @@ export default function LumberDemoPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warming, setWarming] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Pre-warm the Render service on page load. Render free tier sleeps after
+  // 15 minutes of inactivity and takes ~30-60s to wake. Pinging /health as
+  // soon as the page loads means the service is ready by the time the user
+  // asks their first question.
+  useEffect(() => {
+    fetch("/api/lumber/health")
+      .finally(() => setWarming(false));
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -340,8 +350,12 @@ export default function LumberDemoPage() {
               Consulting demo · Natural language over real business data
             </p>
           </div>
-          <span className="ml-auto text-xs font-medium px-2.5 py-1 rounded-full border bg-green-50 text-green-700 border-green-200">
-            Live demo
+          <span className={`ml-auto text-xs font-medium px-2.5 py-1 rounded-full border transition-colors ${
+            warming
+              ? "bg-amber-50 text-amber-700 border-amber-200"
+              : "bg-green-50 text-green-700 border-green-200"
+          }`}>
+            {warming ? "Starting up…" : "Ready"}
           </span>
         </div>
       </div>
