@@ -13,7 +13,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     template: "%s | Yash Vajifdar",
-    default: "Yash Vajifdar — Data Engineering & AI",
+    default: "Yash Vajifdar — Data & AI",
   },
   description:
     "Senior data engineering leader who builds teams, platforms, and culture at scale. Currently at Amazon Alexa AI. Also available for analytics consulting with mid-market businesses.",

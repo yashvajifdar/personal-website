@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/Button";
 import { Tag } from "@/components/ui/Tag";
 
 export const metadata: Metadata = {
-  title: "Yash Vajifdar — Data Engineering & AI",
+  title: "Yash Vajifdar — Data & AI",
   description:
     "Senior data engineering leader at Amazon Alexa AI. Building AI infrastructure at scale and analytics platforms for mid-market businesses.",
 };
 
 const CREDENTIALS = [
-  { value: "1.2PB+", label: "processed daily" },
-  { value: "250+", label: "person org" },
-  { value: "8+ yrs", label: "in engineering" },
+  { value: "1.2PB+", label: "Processed Daily" },
+  { value: "250+", label: "Person Org" },
+  { value: "8+ yrs", label: "in Data & AI" },
 ] as const;
 
 const PROJECTS = [
