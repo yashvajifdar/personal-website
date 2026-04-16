@@ -1,91 +1,142 @@
-# yashvajifdar.com
+# yashvajifdar.com — Personal Website
 
-Personal brand and consulting marketing site.
+Personal brand and consulting marketing site serving two audiences simultaneously:
+Director-level hiring managers and mid-market analytics consulting prospects.
+
+Live at **[yashvajifdar.com](https://yashvajifdar.com)**
+
+---
 
 ## Stack
 
-- **Next.js 14** (App Router)
-- **TypeScript** (strict mode)
-- **Tailwind CSS** with `@tailwindcss/typography`
-- **MDX** via `next-mdx-remote` for articles
-- **gray-matter** + **reading-time** for article frontmatter
-- Deployed on **Vercel**
+| Layer | Technology | Why |
+|-------|-----------|-----|
+| Framework | Next.js 16 (App Router) | RSC, static generation, Vercel-native |
+| Language | TypeScript strict | Catches errors at build time, not runtime |
+| Styling | Tailwind CSS + design tokens | Consistent visual language without a component library |
+| Content | MDX files in `content/articles/` | No CMS dependency, version-controlled articles |
+| Hosting | Vercel (free tier) | Zero-config Next.js deploy, auto SSL, global CDN |
+| DNS / CDN | Cloudflare (free tier) | DDoS protection, caching, fast DNS, free SSL |
+| Domain registrar | GoDaddy (transfer to Cloudflare before June 2026) | Transfer saves ~$13/yr |
 
-## Getting started
+Full architecture decisions and tradeoff tables: [`docs/architecture.md`](docs/architecture.md)
+
+---
+
+## Running Locally
 
 ```bash
+cd projects/personal-website
 npm install
-npm run dev
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
-
-## Project structure
-
-```
-app/                  # Next.js App Router pages
-  page.tsx            # Home
-  about/page.tsx
-  work/page.tsx
-  services/page.tsx
-  writing/page.tsx
-  writing/[slug]/page.tsx   # Dynamic article route
-  contact/page.tsx
-  layout.tsx          # Root layout (Nav + Footer)
-  globals.css
-
-components/
-  layout/
-    Nav.tsx
-    Footer.tsx
-  ui/
-    Button.tsx
-    Tag.tsx
-    SectionLabel.tsx
-
-lib/
-  articles.ts         # Reads .mdx files from content/articles/
-  cn.ts               # Tailwind class merging utility
-
-content/
-  articles/           # Drop .mdx files here to publish articles
+```bash
+npm run typecheck  # TypeScript check — run before every push
+npm run build      # Production build — catches errors locally before Vercel does
+npm run lint       # ESLint
 ```
 
-## Publishing an article
+---
 
-Create a file in `content/articles/your-slug.mdx` with the following frontmatter:
+## Project Structure
+
+```
+personal-website/
+│
+├── app/                          # Next.js App Router pages
+│   ├── page.tsx                  # / — Hero, credential anchors, portfolio preview
+│   ├── about/page.tsx            # /about — Story, principles, partnerships
+│   ├── work/page.tsx             # /work — Portfolio projects
+│   ├── services/page.tsx         # /services — Consulting offer, pricing, fit
+│   ├── writing/page.tsx          # /writing — Article index
+│   ├── writing/[slug]/page.tsx   # /writing/:slug — Dynamic MDX article
+│   ├── contact/page.tsx          # /contact — Consulting + recruiting paths
+│   ├── layout.tsx                # Root layout — Nav, Footer, global metadata
+│   └── globals.css               # Global styles, Tailwind base
+│
+├── components/
+│   ├── layout/
+│   │   ├── Nav.tsx               # Sticky top nav with active route highlighting
+│   │   └── Footer.tsx
+│   └── ui/
+│       ├── Button.tsx            # primary / secondary / ghost variants
+│       ├── Tag.tsx               # Small pill label for tech tags
+│       └── SectionLabel.tsx      # Uppercase label above section headings
+│
+├── content/
+│   └── articles/                 # MDX files — set published: true to go live
+│
+├── lib/
+│   ├── articles.ts               # Frontmatter parsing, article index builder
+│   └── cn.ts                     # clsx + tailwind-merge utility
+│
+├── docs/
+│   ├── architecture.md           # Stack decisions, tradeoff tables, infrastructure diagram
+│   ├── runbook.md                # Deploy, DNS, domain transfer, troubleshooting
+│   └── roadmap.md                # What's next — lumber integration, articles, features
+│
+├── public/                       # Static assets (favicon, OG image — see roadmap)
+├── tailwind.config.ts            # Design tokens — colors, fonts, spacing
+├── next.config.mjs               # Next.js config
+└── tsconfig.json                 # TypeScript strict mode
+```
+
+---
+
+## Pages
+
+| Route | Purpose |
+|-------|---------|
+| `/` | Hero, credential anchors (Amazon Alexa AI, 250+ org), consulting CTA |
+| `/about` | Practitioner story, principles, MIT + Kodi partnerships |
+| `/work` | Portfolio — Lumber AI Analytics, MIT research, upcoming |
+| `/services` | Consulting offer — deliverables, pricing, who it's for |
+| `/writing` | Article index — published MDX pieces |
+| `/writing/[slug]` | Individual MDX article with typography |
+| `/contact` | Two paths: consulting inquiry + Director recruiting |
+
+---
+
+## Publishing an Article
+
+Create `content/articles/<slug>.mdx`:
 
 ```mdx
 ---
-title: "Your Article Title"
-description: "One-sentence summary for SEO and the writing index."
+title: "Title Here"
+description: "One sentence for SEO and the article index card."
 date: "2026-06-01"
-tags: ["Agentic AI", "Data Engineering"]
+tags: ["Data Engineering", "AI"]
 published: true
 publication: "MIT x Jackfruit.ai"   # optional
-coAuthors: ["Jane Smith"]            # optional
+coAuthors: ["Name Here"]            # optional
 ---
 
-Your article content here...
+Article body in Markdown...
 ```
 
-Set `published: false` to draft without it appearing on the site.
+Set `published: false` to draft. Push to `main` and Vercel deploys automatically.
 
-## Deploying to Vercel
+---
 
-```bash
-# One-time setup
-npx vercel
+## Design Tokens
 
-# Subsequent deploys happen automatically on git push to main
-```
+All colors defined in `tailwind.config.ts`. Never use raw hex in components.
 
-## Design system
+| Token | Use |
+|-------|-----|
+| `ink` / `ink-muted` / `ink-subtle` | Text hierarchy |
+| `surface-1` through `surface-3` | Background tones |
+| `accent` | Links, highlights, CTAs (`#1a56db`) |
 
-Colors and typography are defined in `tailwind.config.ts`. The palette:
+Components use named exports only — `import { Button }`, never default imports.
 
-- `ink` / `ink-muted` / `ink-subtle` — text hierarchy
-- `surface-1` through `surface-3` — background tones
-- `accent` — action blue (`#1a56db`)
+---
 
-Components are named exports — import with `{ }`, never default imports.
+## Deployment
+
+Every push to `main` auto-deploys to Vercel. No manual steps required.
+Push to any other branch for a preview URL before merging.
+
+Full deployment and DNS runbook: [`docs/runbook.md`](docs/runbook.md)
