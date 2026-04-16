@@ -148,21 +148,42 @@ function Chart({
   }
 
   if (spec.type === "line" || spec.type === "line_multi") {
-    const extraKeys = spec.type === "line_multi"
-      ? Object.keys(data[0] ?? {}).filter((k) => k !== xKey)
-      : [yKey];
+    // line_multi with color_col: data is long format (one row per series per period).
+    // Recharts needs wide format (one row per period, one column per series).
+    // Pivot here so each location/series becomes its own column.
+    let chartData = data;
+    let seriesKeys: string[] = [yKey];
+
+    if (spec.type === "line_multi" && spec.color_col) {
+      const colKey = spec.color_col;
+      seriesKeys = [...new Set(data.map((r) => String(r[colKey] ?? "")))].sort();
+      const periods = [...new Set(data.map((r) => String(r[xKey] ?? "")))].sort();
+      chartData = periods.map((period) => {
+        const row: Record<string, unknown> = { [xKey]: period };
+        seriesKeys.forEach((s) => {
+          const match = data.find(
+            (r) => String(r[xKey]) === period && String(r[colKey]) === s
+          );
+          row[s] = match ? match[yKey] : null;
+        });
+        return row;
+      });
+    } else if (spec.type === "line_multi") {
+      seriesKeys = Object.keys(data[0] ?? {}).filter((k) => k !== xKey);
+    }
+
     return (
       <div className="mt-3 h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
+          <LineChart data={chartData} margin={{ top: 4, right: 16, left: 8, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
             <XAxis dataKey={xKey} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
             <YAxis tickFormatter={(v) => fmt(v)} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={60} />
             <Tooltip formatter={(v) => fmt(v)} />
-            {extraKeys.length > 1 && <Legend />}
-            {extraKeys.map((k, i) => (
+            {seriesKeys.length > 1 && <Legend />}
+            {seriesKeys.map((k, i) => (
               <Line key={k} type="monotone" dataKey={k} stroke={COLORS[i % COLORS.length]}
-                dot={false} strokeWidth={2} name={label(k)} />
+                dot={false} strokeWidth={2} name={k} />
             ))}
           </LineChart>
         </ResponsiveContainer>
@@ -560,18 +581,20 @@ export default function LumberDemoPage() {
           <div ref={bottomRef} />
         </div>
 
-        {/* Follow-up chips */}
+        {/* Follow-up chips — shuffled, centered */}
         {lastAssistant?.follow_ups && lastAssistant.follow_ups.length > 0 && !loading && (
-          <div className="flex flex-wrap gap-2 mt-6">
-            {lastAssistant.follow_ups.map(({ label, question }) => (
-              <button
-                key={label}
-                onClick={() => sendQuestion(question)}
-                className="text-xs font-medium px-3 py-1.5 rounded-full border border-surface-3 bg-white text-ink-muted hover:border-accent hover:text-accent transition-colors"
-              >
-                {label}
-              </button>
-            ))}
+          <div className="flex flex-wrap justify-center gap-2 mt-6">
+            {[...lastAssistant.follow_ups]
+              .sort(() => Math.random() - 0.5)
+              .map(({ label, question }) => (
+                <button
+                  key={label}
+                  onClick={() => sendQuestion(question)}
+                  className="text-xs font-medium px-3 py-1.5 rounded-full border border-surface-3 bg-white text-ink-muted hover:border-accent hover:text-accent transition-colors"
+                >
+                  {label}
+                </button>
+              ))}
           </div>
         )}
 
