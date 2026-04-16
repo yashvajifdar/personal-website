@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const CREDENTIALS = [
   { value: "1.2PB+", label: "processed daily" },
   { value: "250+", label: "person org" },
-  { value: "8 yrs", label: "in data engineering" },
+  { value: "8+ yrs", label: "in engineering" },
 ] as const;
 
 const PROJECTS = [
