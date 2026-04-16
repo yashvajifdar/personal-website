@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import {
+  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from "recharts";
 
 // ── types ─────────────────────────────────────────────────────────────────────
 
@@ -64,6 +68,108 @@ const SUGGESTIONS: { icon: string; label: string; question: string }[] = [
   },
 ];
 
+// ── colour palette ────────────────────────────────────────────────────────────
+
+const COLORS = ["#2563EB", "#16A34A", "#D97706", "#DC2626", "#7C3AED", "#0891B2"];
+
+const fmt = (v: unknown): string => {
+  if (v === null || v === undefined) return "—";
+  if (typeof v === "number") {
+    if (Math.abs(v) >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
+    if (Math.abs(v) >= 1_000) return `$${(v / 1_000).toFixed(1)}K`;
+    if (v % 1 !== 0) return v.toFixed(1);
+  }
+  return String(v);
+};
+
+// ── chart component ───────────────────────────────────────────────────────────
+
+function Chart({ data, spec }: { data: Record<string, unknown>[]; spec: ChartSpec }) {
+  if (!data || data.length === 0) return null;
+
+  const xKey = spec.x ?? "";
+  const yKey = spec.y ?? "";
+  const label = (k: string) => spec.labels?.[k] ?? k.replace(/_/g, " ");
+
+  if (spec.type === "bar") {
+    return (
+      <div className="mt-3 h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+            <XAxis dataKey={xKey} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+            <YAxis tickFormatter={(v) => fmt(v)} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={60} />
+            <Tooltip formatter={(v) => fmt(v)} labelFormatter={(l) => String(l)} />
+            <Bar dataKey={yKey} fill={COLORS[0]} radius={[3, 3, 0, 0]} name={label(yKey)} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+
+  if (spec.type === "horizontal_bar") {
+    return (
+      <div className="mt-3 h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} layout="vertical" margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" horizontal={false} />
+            <XAxis type="number" tickFormatter={(v) => fmt(v)} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+            <YAxis type="category" dataKey={yKey} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={90} />
+            <Tooltip formatter={(v) => fmt(v)} />
+            <Bar dataKey={xKey} fill={COLORS[0]} radius={[0, 3, 3, 0]} name={label(xKey)} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+
+  if (spec.type === "line" || spec.type === "line_multi") {
+    const extraKeys = spec.type === "line_multi"
+      ? Object.keys(data[0] ?? {}).filter((k) => k !== xKey)
+      : [yKey];
+    return (
+      <div className="mt-3 h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+            <XAxis dataKey={xKey} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+            <YAxis tickFormatter={(v) => fmt(v)} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={60} />
+            <Tooltip formatter={(v) => fmt(v)} />
+            {extraKeys.length > 1 && <Legend />}
+            {extraKeys.map((k, i) => (
+              <Line key={k} type="monotone" dataKey={k} stroke={COLORS[i % COLORS.length]}
+                dot={false} strokeWidth={2} name={label(k)} />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+
+  if (spec.type === "pie") {
+    const nameKey = spec.names ?? xKey;
+    const valueKey = spec.values ?? yKey;
+    return (
+      <div className="mt-3 h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={data} dataKey={valueKey} nameKey={nameKey}
+              cx="50%" cy="50%" outerRadius={88} label={({ name, percent }) =>
+                `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
+              } labelLine={false}>
+              {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+            </Pie>
+            <Tooltip formatter={(v) => fmt(v)} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+
+  // scatter and unknown types — fall through to DataTable below
+  return null;
+}
+
 // ── simple data table for chart_data ─────────────────────────────────────────
 
 function DataTable({
@@ -86,17 +192,6 @@ function DataTable({
 
   const label = (col: string) =>
     spec.labels?.[col] ?? col.replace(/_/g, " ");
-
-  const fmt = (val: unknown): string => {
-    if (val === null || val === undefined) return "—";
-    if (typeof val === "number") {
-      if (Math.abs(val) >= 1_000_000)
-        return `$${(val / 1_000_000).toFixed(1)}M`;
-      if (Math.abs(val) >= 1_000) return `$${(val / 1_000).toFixed(1)}K`;
-      if (val % 1 !== 0) return val.toFixed(1);
-    }
-    return String(val);
-  };
 
   return (
     <div className="mt-3 overflow-x-auto rounded-lg border border-surface-3">
@@ -270,12 +365,14 @@ export default function LumberDemoPage() {
                       {msg.content}
                     </div>
 
-                    {/* Data table */}
+                    {/* Chart — falls back to table for 'table' type or unrecognised specs */}
                     {msg.chart_data && msg.chart_spec && (
-                      <DataTable
-                        data={msg.chart_data}
-                        spec={msg.chart_spec}
-                      />
+                      <>
+                        <Chart data={msg.chart_data} spec={msg.chart_spec} />
+                        {["table", "scatter"].includes(msg.chart_spec.type) && (
+                          <DataTable data={msg.chart_data} spec={msg.chart_spec} />
+                        )}
+                      </>
                     )}
 
                     {/* Error note — friendly, no raw internals */}
