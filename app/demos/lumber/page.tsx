@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -532,8 +533,9 @@ export default function LumberDemoPage() {
                     🪵
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="bg-white border border-surface-3 rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-ink leading-relaxed">
-                      {msg.content}
+                    <div className="bg-white border border-surface-3 rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-ink leading-relaxed prose prose-sm max-w-none
+                      prose-p:my-1 prose-ul:my-1 prose-ul:pl-4 prose-li:my-0.5 prose-strong:text-ink prose-strong:font-semibold">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
 
                     {/* Chart — falls back to table for 'table' type or unrecognised specs */}
