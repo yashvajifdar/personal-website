@@ -53,18 +53,27 @@ The dual-audience problem is solved by **positioning**, not by splitting the sit
                            │
           ┌────────────────┼────────────────┐
           │                                 │
-┌─────────▼──────────┐       ┌─────────────▼──────────┐
-│       GITHUB         │       │   FASTAPI BACKEND       │
-│   (source of truth)  │       │   (Railway / Render)    │
-│  ─────────────────  │       │  ──────────────────────  │
-│  Code repository     │       │  POST /ask               │
-│  Push → auto-deploy  │       │  GET  /health            │
-└─────────────────────┘       │  AnthropicEngine         │
-                               │  metrics/kpis.py         │
-                               └─────────────────────────┘
+┌─────────▼──────────┐       ┌──────────────────────────┐
+│       GITHUB         │       │   FASTAPI BACKEND         │
+│   (source of truth)  │       │   Render (free tier)      │
+│  ─────────────────  │       │  ────────────────────────  │
+│  Code repository     │       │  POST /ask                 │
+│  Push → auto-deploy  │       │  GET  /health              │
+│  (personal-website)  │       │  AnthropicEngine           │
+│  (lumber-ai-analytics│       │  metrics/kpis.py           │
+│   — Render deploys   │       │  data/lumber.db (SQLite)   │
+│     from this too)   │       │                            │
+└─────────────────────┘       │  Auto-sleeps after 15 min  │
+                               │  idle → $0 cost at rest    │
+                               └──────────────────────────┘
 
 Domain registration: GoDaddy (temporary)
 Transfer to: Cloudflare Registrar before June 5, 2026
+
+Note on the two-host architecture:
+  Vercel hosts everything a Next.js app does well: static pages, RSC, API proxy routes.
+  Render hosts the Python backend because Vercel serverless functions cannot generate
+  or persist files — and the analytics engine requires SQLite on disk.
 ```
 
 ---
@@ -104,24 +113,41 @@ touches the backend directly — all requests go through a Next.js API route.
 Browser
   │  POST /api/lumber/ask
   ▼
-Next.js API route  (app/api/lumber/ask/route.ts)
-  │  reads LUMBER_API_URL env var (Vercel)
+Vercel — Next.js API route  (app/api/lumber/ask/route.ts)
+  │  Server-side only — browser never touches Render directly
+  │  Reads LUMBER_API_URL env var (set in Vercel dashboard)
+  │  30-second timeout (handles Render cold starts gracefully)
   │  POST /ask
   ▼
-FastAPI backend  (Railway or Render)
-  │  app/api.py in lumber-ai-analytics repo
+Render — FastAPI backend  (app/api.py in lumber-ai-analytics repo)
+  │  Free tier: auto-sleeps after 15 min idle, wakes on request
   │  CORS whitelist: yashvajifdar.com, localhost:3000
+  │  Reads ANTHROPIC_API_KEY from Render env vars
   ▼
 AnthropicEngine  (two-turn tool-use flow)
-  │  LLM selects KPI tool → function executes → LLM explains
+  │  Turn 1: LLM selects KPI tool + parameters
+  │  Turn 2: LLM reads data, writes plain-English explanation
+  ▼
+metrics/kpis.py  →  data/lumber.db  (SQLite, generated at Render build time)
   ▼
 JSON response  { text, follow_ups, chart_spec, chart_data }
   ▼
-Next.js chat page renders text + data table + follow-up chips
+Vercel — Next.js chat page renders text + data table + follow-up chips
 ```
 
+**Why the proxy route exists (not direct browser → Render):**
+
+- Hides the Render URL from the browser (no scraping, no abuse)
+- Handles CORS centrally — the browser only ever talks to its own Vercel origin
+- Lets us swap the backend URL in one Vercel env var without touching any code
+
 **If `LUMBER_API_URL` is unset:** the proxy returns a friendly "check back soon" message
-with HTTP 200, so the page always renders safely without an error state.
+with HTTP 200, so the page always renders safely — no error state shown to visitors.
+
+**Cold start behavior:** Render free tier sleeps after 15 minutes of no traffic. The first
+request after sleep takes 30–60 seconds. The proxy's 30-second timeout is intentionally set
+to handle this — the request will succeed, just slowly. Subsequent requests are fast (~5–10s
+for the two-turn LLM flow).
 
 ---
 
@@ -207,19 +233,28 @@ with HTTP 200, so the page always renders safely without an error state.
 
 ---
 
-### 5.7 Lumber Demo Backend: FastAPI
+### 5.7 Lumber Demo Backend: FastAPI on Render
 
 | Option | Pro | Con |
 | --- | --- | --- |
-| **FastAPI + Railway** (chosen) | Keeps Python business logic in Python, auto-docs, async-ready | Extra deploy target to maintain |
-| Streamlit Cloud embed | No new code | Iframe UX, different design language |
-| Rewrite engine in TypeScript | Single codebase | Rewrites 500+ lines of Python analytics code |
-| Vercel serverless function | Single deploy | Python cold starts, 10s timeout limit |
+| **FastAPI on Render free tier** (chosen) | Auto-sleeps when idle ($0 cost at rest), Python-native, no code rewrite | Cold start 30–60s after idle; extra deploy target |
+| Railway | Same Python stack | Always-on containers — continuous billing even at zero traffic |
+| Vercel serverless (Python) | Single deploy target | Vercel functions use a read-only filesystem — cannot generate or persist `data/lumber.db` at runtime |
+| Streamlit Cloud embed | No new code | Iframe UX, different design language, no control over styling |
+| Rewrite engine in TypeScript | Single codebase, one deploy | Rewrites 500+ lines of Python analytics + AI logic |
 
-**Decision:** FastAPI wrapper in the `lumber-ai-analytics` repo, deployed separately.
-The personal website proxies to it via a Next.js API route, keeping the backend URL hidden
-from the browser and avoiding CORS issues. If the backend is down or not yet configured,
-the proxy returns a graceful fallback message.
+**Decision:** FastAPI in the `lumber-ai-analytics` repo, deployed to Render free tier.
+
+Why Render over Railway: Railway runs containers 24/7 regardless of traffic — continuous
+compute cost for a demo that may go days without a visitor. Render free tier auto-sleeps
+after 15 minutes of inactivity and wakes on the next request. The cold start (30–60s) is
+acceptable for a demo; at production client scale, we'd upgrade to a paid tier or persistent host.
+
+Why not Vercel serverless: The analytics engine generates and reads `data/lumber.db` — a
+SQLite file built at deploy time. Vercel serverless functions run in a read-only filesystem
+with no persistence between invocations. SQLite requires a writable, persistent disk.
+
+Why a proxy route instead of direct browser → Render: see section 4 above.
 
 ---
 
@@ -245,4 +280,4 @@ the proxy returns a graceful fallback message.
 | Content | MDX files | Contentful, Sanity | Replace `lib/articles.ts` with CMS client |
 | Contact form | mailto link | Resend, Formspree | Add API route + email service |
 | Analytics | None | Vercel Analytics, Plausible | Add script to `layout.tsx` |
-| Lumber demo backend | FastAPI on Railway | Any Python host | Update `LUMBER_API_URL` in Vercel |
+| Lumber demo backend | FastAPI on Render (free) | Any Python host with persistent filesystem | Update `LUMBER_API_URL` in Vercel |
