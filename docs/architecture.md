@@ -1,5 +1,29 @@
 # yashvajifdar.com — Architecture & Design Document
 
+## 0. What Each Service Is (Plain English)
+
+If you're ever confused about what a tool does, start here.
+
+| Service | What it is | What it does in this project | Cost |
+| --- | --- | --- | --- |
+| **GitHub** | Where code lives | Stores all the source code. Every push to `main` triggers an automatic deploy. Think of it as the single source of truth. | Free |
+| **Vercel** | Hosting for the website | Takes the code from GitHub, builds it, and serves it to visitors at `yashvajifdar.com`. Also runs the `/api/lumber/ask` proxy route server-side. Auto-deploys on every push — no manual steps. | Free (hobby tier) |
+| **Cloudflare** | Sits in front of Vercel | Handles DNS (translating `yashvajifdar.com` to the right server), adds DDoS protection, and caches content at the edge. Visitors hit Cloudflare first, then Cloudflare forwards to Vercel. | Free |
+| **GoDaddy** | Domain registrar (temporary) | Where `yashvajifdar.com` was originally purchased. Just handles registration — DNS is managed by Cloudflare. Being transferred to Cloudflare Registrar before June 5, 2026. | $22.99/yr → transfer saves $13 |
+| **Render** | Hosting for the Python backend | Runs the FastAPI analytics engine (`app/api.py`) that powers the `/demos/lumber` chat page. Free tier auto-sleeps after 15 minutes of no traffic — wakes on next request (30–60s cold start). | Free (sleeps when idle) |
+| **Anthropic** | AI provider | Claude answers the business questions. The engine sends two API calls per question: one to pick the right analytics function, one to explain the results in plain English. | Pay per use (~$0.01–0.05/question) |
+
+**The key mental model:**
+
+```text
+Visitor → Cloudflare (DNS + cache) → Vercel (website + proxy) → Render (Python AI engine) → Anthropic (Claude)
+```
+
+Cloudflare and Vercel are always-on (free, no cost concern).
+Render sleeps when idle — the only live cost is Anthropic API calls when someone actually uses the demo.
+
+---
+
 ## 1. Goals
 
 Two audiences, one site. The site must work simultaneously for:
@@ -78,7 +102,24 @@ Note on the two-host architecture:
 
 ---
 
-## 3. Deploy Pipeline
+## 3. Live URLs (as of April 2026)
+
+| What | URL | Hosted on |
+| --- | --- | --- |
+| Personal website | <https://yashvajifdar.com> | Vercel |
+| Lumber AI demo page | <https://yashvajifdar.com/demos/lumber> | Vercel |
+| Lumber API proxy route | `POST https://yashvajifdar.com/api/lumber/ask` | Vercel (serverless) |
+| Lumber FastAPI backend | <https://lumber-ai-analytics.onrender.com> | Render |
+| Lumber API health check | <https://lumber-ai-analytics.onrender.com/health> | Render |
+| Vercel dashboard | <https://vercel.com/dashboard> | — |
+| Render dashboard | <https://dashboard.render.com> | — |
+| Cloudflare dashboard | <https://dash.cloudflare.com> | — |
+| GitHub — personal site | <https://github.com/yashvajifdar/personal-website> | — |
+| GitHub — lumber analytics | <https://github.com/yashvajifdar/lumber-ai-analytics> | — |
+
+---
+
+## 4. Deploy Pipeline
 
 ```text
 Developer pushes to main
@@ -104,7 +145,7 @@ Push to any non-main branch creates a preview deployment at a unique URL.
 
 ---
 
-## 4. Lumber AI Demo Architecture
+## 5. Lumber AI Demo Architecture
 
 The `/demos/lumber` page connects to a separate Python backend. The browser never
 touches the backend directly — all requests go through a Next.js API route.
@@ -151,7 +192,7 @@ for the two-turn LLM flow).
 
 ---
 
-## 5. Component Decisions & Tradeoffs
+## 6. Component Decisions & Tradeoffs
 
 ### 5.1 Framework: Next.js 16 (App Router)
 
@@ -258,7 +299,7 @@ Why a proxy route instead of direct browser → Render: see section 4 above.
 
 ---
 
-## 6. What Deliberately Does Not Exist
+## 7. What Deliberately Does Not Exist
 
 **No database.** Static site with one dynamic demo page. No user state. No auth.
 
@@ -270,7 +311,7 @@ Why a proxy route instead of direct browser → Render: see section 4 above.
 
 ---
 
-## 7. Modular Replacement Guide
+## 8. Modular Replacement Guide
 
 | Component | Current | Replace with | What changes |
 | --- | --- | --- | --- |
