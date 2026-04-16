@@ -262,6 +262,104 @@ function DataTable({
   );
 }
 
+// ── server status types ───────────────────────────────────────────────────────
+
+type ServerStatus = "warming" | "ready" | "unavailable";
+
+// ── launch gate ───────────────────────────────────────────────────────────────
+
+function LaunchGate({
+  status,
+  onStart,
+  onRetry,
+}: {
+  status: ServerStatus;
+  onStart: () => void;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="min-h-screen bg-surface-1 flex items-center justify-center px-6">
+      <div className="w-full max-w-sm">
+        {/* Product identity */}
+        <div className="flex items-center gap-3 mb-8">
+          <span className="text-3xl">🪵</span>
+          <div>
+            <p className="text-base font-semibold text-ink leading-tight">Lumber AI Analytics</p>
+            <p className="text-xs text-ink-muted">Natural language over real business data</p>
+          </div>
+        </div>
+
+        {/* Status card */}
+        <div className="bg-white border border-surface-3 rounded-2xl p-6 mb-4 shadow-sm">
+
+          {status === "warming" && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-400" />
+                </span>
+                <p className="text-sm font-medium text-ink">Waking up the demo server</p>
+              </div>
+              <p className="text-xs text-ink-muted leading-relaxed">
+                The server sleeps when idle to keep costs at zero. It takes about 30–60 seconds to start.
+                Hang tight — the session will open automatically when it&apos;s ready.
+              </p>
+              <div className="w-full h-1 bg-surface-2 rounded-full overflow-hidden">
+                <div className="h-full bg-amber-400 rounded-full animate-pulse w-2/3" />
+              </div>
+            </div>
+          )}
+
+          {status === "ready" && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="relative flex h-3 w-3">
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
+                </span>
+                <p className="text-sm font-medium text-ink">Server ready</p>
+              </div>
+              <p className="text-xs text-ink-muted leading-relaxed">
+                Live connection to the analytics backend. Data covers 15 months, 200 customers,
+                and 4 yard locations.
+              </p>
+              <button
+                onClick={onStart}
+                className="w-full py-2.5 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors"
+              >
+                Start session →
+              </button>
+            </div>
+          )}
+
+          {status === "unavailable" && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
+                <p className="text-sm font-medium text-ink">Server unavailable</p>
+              </div>
+              <p className="text-xs text-ink-muted leading-relaxed">
+                The demo server didn&apos;t respond in time. This can happen after extended downtime.
+                Try again in a few minutes.
+              </p>
+              <button
+                onClick={onRetry}
+                className="w-full py-2.5 border border-surface-3 text-ink text-sm font-medium rounded-xl hover:border-accent hover:text-accent transition-colors"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+        </div>
+
+        <p className="text-xs text-ink-subtle text-center">
+          Built with FastAPI · Gemini · SQLite · Recharts
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── main page ─────────────────────────────────────────────────────────────────
 
 export default function LumberDemoPage() {
@@ -269,17 +367,18 @@ export default function LumberDemoPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [warming, setWarming] = useState(true);
+  const [status, setStatus] = useState<ServerStatus>("warming");
+  const [launched, setLaunched] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Pre-warm the Render service on page load. Render free tier sleeps after
-  // 15 minutes of inactivity and takes ~30-60s to wake. Pinging /health as
-  // soon as the page loads means the service is ready by the time the user
-  // asks their first question.
-  useEffect(() => {
+  const pingHealth = () => {
+    setStatus("warming");
     fetch("/api/lumber/health")
-      .finally(() => setWarming(false));
-  }, []);
+      .then((r) => setStatus(r.ok ? "ready" : "unavailable"))
+      .catch(() => setStatus("unavailable"));
+  };
+
+  useEffect(() => { pingHealth(); }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -336,6 +435,16 @@ export default function LumberDemoPage() {
     (m) => m.role === "assistant"
   );
 
+  if (!launched) {
+    return (
+      <LaunchGate
+        status={status}
+        onStart={() => setLaunched(true)}
+        onRetry={pingHealth}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-surface-1">
       {/* ── page header ───────────────────────────────────────────────── */}
@@ -350,12 +459,9 @@ export default function LumberDemoPage() {
               Consulting demo · Natural language over real business data
             </p>
           </div>
-          <span className={`ml-auto text-xs font-medium px-2.5 py-1 rounded-full border transition-colors ${
-            warming
-              ? "bg-amber-50 text-amber-700 border-amber-200"
-              : "bg-green-50 text-green-700 border-green-200"
-          }`}>
-            {warming ? "Starting up…" : "Ready"}
+          <span className="ml-auto flex items-center gap-1.5 text-xs font-medium text-green-700">
+            <span className="inline-flex rounded-full h-2 w-2 bg-green-500" />
+            Live
           </span>
         </div>
       </div>
