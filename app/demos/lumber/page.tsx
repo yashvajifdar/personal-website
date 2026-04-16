@@ -278,10 +278,10 @@ export default function LumberDemoPage() {
                       />
                     )}
 
-                    {/* Error badge */}
+                    {/* Error note — friendly, no raw internals */}
                     {msg.error && (
-                      <p className="mt-2 text-xs text-amber-600">
-                        ⚠️ {msg.error}
+                      <p className="mt-2 text-xs text-ink-muted italic">
+                        {msg.error}
                       </p>
                     )}
                   </div>
@@ -324,10 +324,10 @@ export default function LumberDemoPage() {
           </div>
         )}
 
-        {/* API error banner */}
+        {/* API error banner — shown when the request itself fails (network, 5xx) */}
         {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-            {error}
+          <div className="mt-4 p-3 bg-surface-2 border border-surface-3 rounded-lg text-sm text-ink-muted">
+            Something went wrong — please try again in a moment.
           </div>
         )}
       </div>
