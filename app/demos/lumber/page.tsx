@@ -23,8 +23,9 @@ interface ChartSpec {
   color_col?: string;
   labels?: Record<string, string>;
   columns?: string[];
-  drill_key?: string;      // data key whose value substitutes into drill_question
-  drill_question?: string; // template: "Show me top products in {category}"
+  quantity_cols?: string[]; // columns that are counts/units — formatted as integers, not currency
+  drill_key?: string;
+  drill_question?: string;
 }
 
 interface Message {
@@ -268,7 +269,9 @@ function DataTable({
             >
               {cols.map((col) => (
                 <td key={col} className="px-4 py-3 text-ink-muted">
-                  {fmt(row[col])}
+                  {spec.quantity_cols?.includes(col) && typeof row[col] === "number"
+                    ? Math.round(row[col] as number).toLocaleString()
+                    : fmt(row[col])}
                 </td>
               ))}
             </tr>
