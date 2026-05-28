@@ -22,7 +22,7 @@ const DELIVERABLES = [
   {
     title: "Semantic data model",
     description:
-      "Model your business logic correctly in dbt: margin, inventory turnover, customer behavior, whatever drives your decisions. This is the foundation. Everything else builds on it.",
+      "Model your business logic correctly: margin, inventory turnover, customer behavior, whatever drives your decisions. This is the foundation. Everything else builds on it.",
   },
   {
     title: "Analytics dashboard",
@@ -124,44 +124,49 @@ export default function ServicesPage() {
 
       {/* Engagement model */}
       <SectionLabel>Engagement model</SectionLabel>
-      <h2 className="text-2xl font-semibold text-ink mb-6">How it works</h2>
+      <h2 className="text-2xl font-semibold text-ink mb-6">How engagements work</h2>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-12">
-        <div className="border border-surface-3 rounded-xl p-6">
-          <p className="text-xs font-semibold tracking-widest uppercase text-ink-subtle mb-2">
-            Phase 1
-          </p>
-          <h3 className="text-base font-semibold text-ink mb-2">
-            Setup & build
-          </h3>
-          <p className="text-sm text-ink-muted leading-relaxed mb-3">
-            Data audit, ETL build, semantic model, dashboard, and AI query layer.
-            One-time engagement delivered over 6–10 weeks.
-          </p>
-          <p className="text-sm font-medium text-ink">$5,000 – $15,000</p>
-          <p className="text-xs text-ink-subtle">Depending on data complexity</p>
-        </div>
+      <div className="mb-6 space-y-4">
+        <p className="text-sm text-ink-muted leading-relaxed">
+          No responsible engineer scopes a project before understanding the system.
+          Every data environment is different. The complexity of connecting a BisTrack
+          ERP to a reporting layer is nothing like connecting a ShipStation account.
+          Before any quote, the first step is understanding what systems are running,
+          how data moves between them, what the business is actually trying to decide,
+          and where the real friction is hiding.
+        </p>
+        <p className="text-sm text-ink-muted leading-relaxed">
+          That starts with a direct conversation. No pitch deck, no intake form. We
+          talk through your stack, your current reporting process, and the specific
+          decisions you cannot make today. From there, scope becomes obvious.
+        </p>
+      </div>
 
-        <div className="border border-surface-3 rounded-xl p-6">
-          <p className="text-xs font-semibold tracking-widest uppercase text-ink-subtle mb-2">
-            Phase 2
-          </p>
-          <h3 className="text-base font-semibold text-ink mb-2">
-            Monthly retainer
-          </h3>
-          <p className="text-sm text-ink-muted leading-relaxed mb-3">
-            Ongoing data refreshes, new metrics, support, and iteration as your
-            business evolves. Not set-it-and-forget-it.
-          </p>
-          <p className="text-sm font-medium text-ink">$1,500 – $3,000 / month</p>
-          <p className="text-xs text-ink-subtle">Cancel anytime</p>
-        </div>
+      <div className="border border-surface-3 rounded-xl p-6 mb-12">
+        <p className="text-xs font-semibold tracking-widest uppercase text-ink-subtle mb-3">
+          Before scoping, I need to know
+        </p>
+        <ul className="space-y-2">
+          {[
+            "What software systems are in use — ERP, POS, inventory, shipping, accounting",
+            "How many years of transactional history exists, and in what form",
+            "How reporting works today — spreadsheets, exports, a BI tool, nothing",
+            "What decisions the business is trying to make but currently cannot",
+            "Whether each vendor exposes an API or data export",
+            "What done looks like — a dashboard, automated reports, a clean data model, something else",
+          ].map((item) => (
+            <li key={item} className="flex items-start gap-3 text-sm text-ink-muted">
+              <span className="text-accent mt-0.5 shrink-0">—</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Why me */}
       <div className="bg-surface-1 border border-surface-3 rounded-xl p-6 mb-16">
         <h3 className="text-base font-semibold text-ink mb-3">
-          Why hire someone from Amazon for this?
+          At 1,000x scale, small-business failure modes are visible from the first conversation.
         </h3>
         <p className="text-sm text-ink-muted leading-relaxed mb-3">
           Because I have shipped data platforms at a scale most consultants have
@@ -176,9 +181,18 @@ export default function ServicesPage() {
           layered on top of all of it, producing confident wrong answers. These
           are not edge cases. They are the default.
         </p>
-        <p className="text-sm text-ink-muted leading-relaxed">
+        <p className="text-sm text-ink-muted leading-relaxed mb-3">
           The work I do for you is designed against all four. Production-grade,
           documented, and built to run without me.
+        </p>
+        <p className="text-sm text-ink-muted leading-relaxed">
+          Operational complexity varies sharply by industry. BisTrack ERP is
+          nothing like ShipStation. Building supply inventory is nothing like
+          chemical distribution. Part of doing this work well is understanding
+          how that domain complexity maps to the right data architecture. The
+          engineering discipline is the same in every engagement: define the data
+          model correctly, build for replaceability, fail loudly instead of
+          silently. The domain changes. The rigor does not.
         </p>
       </div>
 
