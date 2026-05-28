@@ -115,7 +115,7 @@ function FindingsSection({ findings }: FindingsSectionProps) {
         Findings
       </p>
       <h2 className="text-xl font-semibold text-ink mb-6">
-        3 things worth acting on
+        {findings.length} things worth acting on
       </h2>
       <div className="space-y-4">
         {findings.map((f) => (
