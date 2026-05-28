@@ -5,6 +5,7 @@
 // reads DOM dimensions at runtime — a browser-only operation.
 // The efficiency table also lives here as it is passed as co-located data.
 
+import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -48,6 +49,32 @@ interface ChemChartsProps {
   channelData: ChannelDatum[];
   topSkus: SkuDatum[];
   efficiency: EfficiencyRow[];
+}
+
+// Discriminated union for which chart, if any, is currently expanded in the modal.
+type ExpandedChart = "channel" | "skus" | null;
+
+// Inline SVG expand icon — no icon library dependency.
+// Two arrows pointing outward from center, 16×16 viewBox.
+function ExpandIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M2 6V2h4M2 2l4 4M14 10v4h-4M14 14l-4-4"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -109,15 +136,29 @@ function PieSliceLabel({
 
 interface ChannelChartProps {
   channelData: ChannelDatum[];
+  // Called when the user clicks the expand button; parent owns modal state.
+  onExpand: () => void;
 }
 
-function ChannelChart({ channelData }: ChannelChartProps) {
+function ChannelChart({ channelData, onExpand }: ChannelChartProps) {
   return (
-    <div className="bg-white border border-surface-3 rounded-xl p-5">
+    // relative positioning is required for the absolute-positioned expand button.
+    <div className="relative bg-white border border-surface-3 rounded-xl p-5">
       <p className="text-xs font-semibold tracking-widest uppercase text-ink-subtle mb-1">
         Revenue by channel
       </p>
-      <p className="text-sm font-semibold text-ink mb-4">Amazon vs. Direct</p>
+      <p className="text-sm font-semibold text-ink mb-4">
+        Revenue by channel — before fees
+      </p>
+      {/* Expand button: absolute top-right, visually subtle, accent on hover */}
+      <button
+        type="button"
+        onClick={onExpand}
+        className="absolute top-4 right-4 text-ink-subtle hover:text-accent transition-colors"
+        aria-label="Expand channel revenue chart"
+      >
+        <ExpandIcon />
+      </button>
       <div
         className="h-56"
         role="img"
@@ -153,7 +194,7 @@ function ChannelChart({ channelData }: ChannelChartProps) {
         </ResponsiveContainer>
       </div>
       <p className="text-xs text-ink-subtle mt-3">
-        Amazon likely carries 10-15% fees. Direct DTC margin is meaningfully higher.
+        Amazon charges ~15% seller fees. DIYChemicals.com orders net ~68% more per shipment after fees.
       </p>
     </div>
   );
@@ -163,15 +204,27 @@ function ChannelChart({ channelData }: ChannelChartProps) {
 
 interface TopSkusChartProps {
   topSkus: SkuDatum[];
+  // Called when the user clicks the expand button; parent owns modal state.
+  onExpand: () => void;
 }
 
-function TopSkusChart({ topSkus }: TopSkusChartProps) {
+function TopSkusChart({ topSkus, onExpand }: TopSkusChartProps) {
   return (
-    <div className="bg-white border border-surface-3 rounded-xl p-5">
+    // relative positioning is required for the absolute-positioned expand button.
+    <div className="relative bg-white border border-surface-3 rounded-xl p-5">
       <p className="text-xs font-semibold tracking-widest uppercase text-ink-subtle mb-1">
         Top SKUs
       </p>
       <p className="text-sm font-semibold text-ink mb-4">Revenue by product</p>
+      {/* Expand button: absolute top-right, visually subtle, accent on hover */}
+      <button
+        type="button"
+        onClick={onExpand}
+        className="absolute top-4 right-4 text-ink-subtle hover:text-accent transition-colors"
+        aria-label="Expand top SKUs revenue chart"
+      >
+        <ExpandIcon />
+      </button>
       <div
         className="h-56"
         role="img"
@@ -292,16 +345,167 @@ function EfficiencyTable({ rows }: EfficiencyTableProps) {
   );
 }
 
+// ── chart modal ───────────────────────────────────────────────────────────────
+
+interface ChartModalProps {
+  // Which chart is currently expanded; null means the modal is closed.
+  expanded: ExpandedChart;
+  channelData: ChannelDatum[];
+  topSkus: SkuDatum[];
+  onClose: () => void;
+}
+
+// Renders the expanded chart in a full-screen overlay.
+// Clicking the dark backdrop or the X button closes it.
+// role="dialog" + aria-modal="true" satisfies WCAG 2.1 AA modal pattern.
+function ChartModal({ expanded, channelData, topSkus, onClose }: ChartModalProps) {
+  if (expanded === null) return null;
+
+  const title =
+    expanded === "channel"
+      ? "Revenue by channel — before fees"
+      : "Revenue by product — top SKUs";
+
+  return (
+    // Backdrop: semi-transparent dark overlay. Click outside the card closes the modal.
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
+      {/* Card: stopPropagation prevents backdrop click handler from firing when clicking inside the card */}
+      <div
+        className="relative bg-white rounded-2xl shadow-xl w-full max-w-3xl p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-ink-subtle hover:text-accent transition-colors"
+          aria-label="Close expanded chart"
+        >
+          {/* Inline X icon — no icon library */}
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 3l12 12M15 3L3 15"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+
+        <p className="text-sm font-semibold text-ink mb-4">{title}</p>
+
+        {/* h-[500px] gives the modal chart significantly more vertical space than the card's h-56 */}
+        <div className="h-[500px]">
+          {expanded === "channel" ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={channelData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={160}
+                  labelLine={false}
+                  label={(props: PieLabelProps) => (
+                    <PieSliceLabel
+                      cx={props.cx}
+                      cy={props.cy}
+                      midAngle={props.midAngle}
+                      outerRadius={props.outerRadius}
+                      name={props.name}
+                      payload={props.payload}
+                    />
+                  )}
+                >
+                  {channelData.map((_, i) => (
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={tooltipFmt} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={topSkus}
+                layout="vertical"
+                margin={{ top: 0, right: 24, left: 4, bottom: 0 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#F1F5F9"
+                  horizontal={false}
+                />
+                <XAxis
+                  type="number"
+                  tickFormatter={(v: number) => fmtRevenue(v)}
+                  tick={{ fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="sku"
+                  tick={{ fontSize: 11 }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={180}
+                />
+                <Tooltip formatter={tooltipFmt} />
+                <Bar
+                  dataKey="revenue"
+                  fill={CHART_COLORS[0]}
+                  radius={[0, 3, 3, 0]}
+                  name="Revenue"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── exported component ────────────────────────────────────────────────────────
 
 export function ChemCharts({ channelData, topSkus, efficiency }: ChemChartsProps) {
+  // expandedChart is null when no modal is open, "channel" or "skus" when one is.
+  const [expandedChart, setExpandedChart] = useState<ExpandedChart>(null);
+
   return (
     <>
       <div className="grid md:grid-cols-2 gap-6">
-        <ChannelChart channelData={channelData} />
-        <TopSkusChart topSkus={topSkus} />
+        <ChannelChart
+          channelData={channelData}
+          onExpand={() => setExpandedChart("channel")}
+        />
+        <TopSkusChart
+          topSkus={topSkus}
+          onExpand={() => setExpandedChart("skus")}
+        />
       </div>
       <EfficiencyTable rows={efficiency} />
+      <ChartModal
+        expanded={expandedChart}
+        channelData={channelData}
+        topSkus={topSkus}
+        onClose={() => setExpandedChart(null)}
+      />
     </>
   );
 }

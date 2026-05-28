@@ -163,6 +163,10 @@ export function ChemDemoPage() {
       <ChemHeader />
       <main className="max-w-wide mx-auto px-6 py-10 space-y-10">
         <KpiStrip tiles={KPI_TILES} />
+        {/* Context note: framing shift — ShipStation surfaces the data; this layer shows what it means */}
+        <p className="text-sm text-ink-muted -mt-4">
+          ShipStation shows volume. The analysis below shows what drives value.
+        </p>
         {/* ChemCharts is the only client boundary -- receives pre-computed data as props */}
         <ChemCharts
           channelData={CHANNEL_DATA}
