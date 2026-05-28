@@ -28,6 +28,16 @@ const PROJECTS = [
     href: "/demos/lumber",
   },
   {
+    title: "ShipStation Analytics",
+    category: "Consulting Demo",
+    description:
+      "24-day ShipStation export turned into actionable insights for a chemical distribution business: channel split, top SKUs by revenue, order-efficiency ranking, and 3 prioritized recommendations.",
+    tags: ["Python", "Recharts", "Next.js", "ShipStation"],
+    status: "Live",
+    statusStyle: "bg-green-50 text-green-700 border-green-200",
+    href: "/demos/chem",
+  },
+  {
     title: "Enterprise Agentic AI Readiness",
     category: "Research · MIT x Jackfruit.ai",
     description:

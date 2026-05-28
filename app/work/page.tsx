@@ -43,6 +43,18 @@ const PROJECTS: Project[] = [
     demoLabel: "Try the demo →",
   },
   {
+    title: "ShipStation Analytics",
+    category: "Consulting Demo",
+    description:
+      "24-day ShipStation export turned into actionable insights for a chemical distribution business.",
+    detail:
+      "Pulled raw order and shipment exports from ShipStation, ran a Python analysis across 2,712 shipments and 462 SKUs, and surfaced three prioritized findings: a brand-split SKU masking the top revenue product, a 10–25x revenue-per-order gap between bulk and small-unit SKUs, and 41 high-frequency low-margin SKUs consuming warehouse labor. Static insights page built in Next.js with Recharts.",
+    tags: ["Python", "Recharts", "Next.js", "ShipStation"],
+    status: "Complete",
+    href: "/demos/chem",
+    demoLabel: "View analysis →",
+  },
+  {
     title: "Enterprise Agentic AI Readiness",
     category: "Research",
     description:
