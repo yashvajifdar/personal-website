@@ -201,7 +201,7 @@ function TopSkusChart({ topSkus }: TopSkusChartProps) {
               tick={{ fontSize: 9 }}
               tickLine={false}
               axisLine={false}
-              width={130}
+              width={160}
             />
             <Tooltip formatter={tooltipFmt} />
             <Bar
