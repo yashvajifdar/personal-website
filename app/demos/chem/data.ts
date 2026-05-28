@@ -57,8 +57,8 @@ export const FINDINGS: {
 }[] = [
   {
     number: "01",
-    title: "Turpentine is your #1 product — but you're splitting it",
-    body: "Turpentine (1 Gal) and Turpentine CFF (1 Gal) are the same product under two brand labels. Combined they generated $12,723 — more than any other SKU. Consolidating into one listing simplifies restocking and makes the demand signal clearer.",
+    title: "Top revenue product is split across two brand labels",
+    body: "Turpentine (1 Gal) and Turpentine CFF (1 Gal) are the same product listed under two different brand names. Combined revenue: $12,723 in 30 days, more than any single SKU. The split makes each look like a mid-tier SKU and likely causes underordering.",
     tag: "SKU consolidation",
     tagColor: "bg-blue-50 text-blue-700 border-blue-200",
   },
