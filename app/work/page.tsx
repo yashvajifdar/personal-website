@@ -34,11 +34,11 @@ const PROJECTS: Project[] = [
     title: "Lumber AI Analytics",
     category: "Consulting Demo",
     description:
-      "End-to-end operational analytics platform for a mid-market lumber supplier.",
+      "Operational analytics platform for a mid-market building supply company with natural language querying.",
     detail:
-      "Ingests data from POS, inventory management, and QuickBooks into a unified data warehouse on AWS. A dbt-modeled semantic layer drives dashboards covering margin by product line, inventory turnover, customer behavior, and sales rep performance. A LangChain-powered query layer enables natural language querying against the semantic model, not the raw tables.",
-    tags: ["dbt", "BigQuery", "LangChain", "Next.js", "Python", "TypeScript"],
-    status: "In Progress",
+      "Python ETL pipeline loads synthetic order, customer, and inventory data into SQLite. A metrics layer of 16 KPI functions covers revenue trends, margin by product, customer behavior, inventory health, and sales rep performance. An Anthropic Claude tool-use engine routes plain-English questions to the right KPI function — no SQL, no dashboards. FastAPI backend deployed on Render, chat interface built in Next.js.",
+    tags: ["Python", "Anthropic", "SQLite", "FastAPI", "Next.js", "TypeScript"],
+    status: "Complete",
     href: "/demos/lumber",
     demoLabel: "Try the demo →",
   },

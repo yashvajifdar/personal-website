@@ -22,7 +22,7 @@ const PROJECTS = [
     category: "Consulting Demo",
     description:
       "Operational analytics platform for a mid-market building supply company. Natural language querying over a trusted metrics layer — no SQL, no dashboards to learn.",
-    tags: ["Python", "Anthropic", "SQLite", "Streamlit"],
+    tags: ["Python", "Anthropic", "SQLite", "FastAPI"],
     status: "Live",
     statusStyle: "bg-green-50 text-green-700 border-green-200",
     href: "/demos/lumber",
