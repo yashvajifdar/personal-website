@@ -40,7 +40,7 @@ export function CloseTradeModal({
     setSubmitting(true);
     setError(null);
     try {
-      await onConfirm(trade.trade_id, price, exitReason);
+      await onConfirm(trade.id, price, exitReason);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to close position.");
       setSubmitting(false);

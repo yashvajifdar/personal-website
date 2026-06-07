@@ -3,12 +3,12 @@
 // Shared confirmation modal for opening a paper trade position.
 
 import { useState } from "react";
-import type { Recommendation, Trade } from "@/lib/quant-api";
+import type { Recommendation, OpenTradePayload } from "@/lib/quant-api";
 
 interface OpenPositionModalProps {
   rec: Recommendation;
   portfolioId: string | null;
-  onConfirm: (trade: Omit<Trade, "trade_id" | "opened_at">) => Promise<void>;
+  onConfirm: (trade: OpenTradePayload) => Promise<void>;
   onCancel: () => void;
   onNeedPortfolio: () => void;
 }
@@ -67,10 +67,11 @@ export function OpenPositionModal({
         ticker: rec.ticker,
         action: rec.action,
         entry_price: rec.risk_params.entry,
+        shares: rec.risk_params.suggested_shares,
         stop: rec.risk_params.stop,
         target: rec.risk_params.target,
-        reward_risk: rec.risk_params.reward_risk_ratio,
-        shares: rec.risk_params.suggested_shares,
+        signal_snapshot: (rec.signals ?? {}) as Record<string, unknown>,
+        thesis: rec.thesis,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to open position.");

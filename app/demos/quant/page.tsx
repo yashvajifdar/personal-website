@@ -13,7 +13,7 @@ import {
 import type {
   Recommendation,
   MacroSnapshot,
-  Trade,
+  OpenTradePayload,
 } from "@/lib/quant-api";
 import { MacroBanner } from "@/components/quant/MacroBanner";
 import { RecommendationCard } from "@/components/quant/RecommendationCard";
@@ -217,9 +217,7 @@ export function QuantDashboardPage() {
     void loadRecommendations(DEFAULT_QUESTION);
   }, [loadRecommendations]);
 
-  async function handleOpenTrade(
-    trade: Omit<Trade, "trade_id" | "opened_at">
-  ) {
+  async function handleOpenTrade(trade: OpenTradePayload) {
     if (!portfolioId) return;
     await openTrade(portfolioId, trade);
     setPendingRec(null);

@@ -9,7 +9,7 @@ import {
   fetchPortfolio,
   closeTrade,
 } from "@/lib/quant-api";
-import type { Portfolio, Trade, ExitReason } from "@/lib/quant-api";
+import type { PortfolioResponse, Trade, ExitReason } from "@/lib/quant-api";
 import { CloseTradeModal } from "@/components/quant/CloseTradeModal";
 
 const STORAGE_KEY = "quant_portfolio_id";
@@ -71,13 +71,13 @@ function CreateScreen({ onCreate, creating, error }: CreateScreenProps) {
 
 // ── Performance summary row ───────────────────────────────────────────────────
 
-function PerformanceSummary({ portfolio }: { portfolio: Portfolio }) {
+function PerformanceSummary({ portfolio }: { portfolio: PortfolioResponse }) {
   const p = portfolio.performance;
   const stats: [string, string, string?][] = [
     ["Total P&L", fmt(p.total_pnl), pnlColor(p.total_pnl)],
-    ["Win Rate", `${(p.win_rate * 100).toFixed(0)}%`],
-    ["Sharpe", p.sharpe_ratio.toFixed(2)],
-    ["Max DD", `${(p.max_drawdown * 100).toFixed(1)}%`],
+    ["Win Rate", p.win_rate != null ? `${(p.win_rate * 100).toFixed(0)}%` : "—"],
+    ["Sharpe", p.sharpe_ratio != null ? p.sharpe_ratio.toFixed(2) : "—"],
+    ["Max DD", p.max_drawdown != null ? `${(p.max_drawdown * 100).toFixed(1)}%` : "—"],
     ["Trades", p.trade_count.toString()],
   ];
 
@@ -126,7 +126,7 @@ function OpenTradesTable({ trades, onClose }: OpenTradesProps) {
         <tbody>
           {trades.map((trade, i) => (
             <tr
-              key={trade.trade_id}
+              key={trade.id}
               className={cn(
                 "border-b border-surface-2",
                 i % 2 === 0 ? "bg-white" : "bg-surface-1"
@@ -156,7 +156,7 @@ function OpenTradesTable({ trades, onClose }: OpenTradesProps) {
 
 // ── Closed trades table ───────────────────────────────────────────────────────
 
-function ClosedTradesTable({ trades }: { trades: Portfolio["closed_trades"] }) {
+function ClosedTradesTable({ trades }: { trades: PortfolioResponse["closed_trades"] }) {
   if (trades.length === 0) {
     return (
       <p className="text-sm text-ink-muted py-4 text-center">
@@ -179,7 +179,7 @@ function ClosedTradesTable({ trades }: { trades: Portfolio["closed_trades"] }) {
         <tbody>
           {trades.map((trade, i) => (
             <tr
-              key={trade.trade_id}
+              key={trade.id}
               className={cn(
                 "border-b border-surface-2",
                 i % 2 === 0 ? "bg-white" : "bg-surface-1"
@@ -210,11 +210,12 @@ function ClosedTradesTable({ trades }: { trades: Portfolio["closed_trades"] }) {
 // ── Main portfolio view ───────────────────────────────────────────────────────
 
 export function PortfolioView() {
-  const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
+  const [portfolio, setPortfolio] = useState<PortfolioResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tradeToClose, setTradeToClose] = useState<Trade | null>(null);
+  const portfolioId = portfolio?.portfolio.id ?? null;
   const [portfolioLink, setPortfolioLink] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
 
@@ -250,10 +251,11 @@ export function PortfolioView() {
     setCreating(true);
     setError(null);
     try {
-      const p = await createPortfolio(username || undefined);
-      localStorage.setItem(STORAGE_KEY, p.id);
+      const created = await createPortfolio(username || undefined);
+      localStorage.setItem(STORAGE_KEY, created.portfolio_id);
+      const p = await fetchPortfolio(created.portfolio_id);
       setPortfolio(p);
-      const link = `${window.location.origin}${window.location.pathname}?p=${p.id}`;
+      const link = `${window.location.origin}${window.location.pathname}?p=${created.portfolio_id}`;
       setPortfolioLink(link);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create portfolio.");
@@ -267,9 +269,10 @@ export function PortfolioView() {
     exitPrice: number,
     exitReason: ExitReason
   ) {
-    if (!portfolio) return;
-    const updated = await closeTrade(portfolio.id, tradeId, exitPrice, exitReason);
-    setPortfolio(updated);
+    if (!portfolioId) return;
+    await closeTrade(portfolioId, tradeId, exitPrice, exitReason);
+    const refreshed = await fetchPortfolio(portfolioId);
+    setPortfolio(refreshed);
     setTradeToClose(null);
   }
 
