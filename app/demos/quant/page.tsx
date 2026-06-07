@@ -76,7 +76,12 @@ function TabNav({ active, onChange }: TabNavProps) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export function QuantDashboardPage() {
-  const [activeTab, setActiveTab] = useState<TabId>("picks");
+  // If a portfolio ID is in the URL (?p=...), default to the Portfolio tab
+  const initialTab: TabId =
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("p")
+      ? "portfolio"
+      : "picks";
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [macro, setMacro] = useState<MacroSnapshot | null>(null);
   const [note, setNote] = useState<string | null>(null);
