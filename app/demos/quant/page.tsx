@@ -50,7 +50,7 @@ interface TabNavProps {
 function TabNav({ active, onChange }: TabNavProps) {
   return (
     <nav
-      className="flex gap-1 border-b border-surface-3 overflow-x-auto"
+      className="flex gap-1 border-b border-surface-3"
       aria-label="Dashboard tabs"
     >
       {TABS.map((tab) => (
