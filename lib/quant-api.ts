@@ -86,6 +86,8 @@ const TradeSchema = z.object({
   target: z.number(),
   thesis: z.string(),
   created_at: z.string().optional(),
+  current_price: z.number().nullable().optional(),
+  unrealized_pnl: z.number().nullable().optional(),
 });
 
 const ClosedTradeSchema = TradeSchema.extend({

@@ -79,6 +79,7 @@ function PerformanceSummary({ portfolio }: { portfolio: PortfolioResponse }) {
     ["Sharpe", p.sharpe_ratio != null ? p.sharpe_ratio.toFixed(2) : "—"],
     ["Max DD", p.max_drawdown != null ? `${(p.max_drawdown * 100).toFixed(1)}%` : "—"],
     ["Trades", p.trade_count.toString()],
+    ["Open", p.open_count.toString()],
   ];
 
   return (
@@ -137,7 +138,16 @@ function OpenTradesTable({ trades, onClose }: OpenTradesProps) {
               <td className="px-4 py-3 text-ink-muted">${trade.entry_price.toFixed(2)}</td>
               <td className="px-4 py-3 text-ink-muted">${trade.stop.toFixed(2)}</td>
               <td className="px-4 py-3 text-ink-muted">${trade.target.toFixed(2)}</td>
-              <td className="px-4 py-3 text-ink-subtle">—</td>
+              <td className={cn(
+                "px-4 py-3 font-semibold",
+                trade.unrealized_pnl == null
+                  ? "text-ink-subtle"
+                  : pnlColor(trade.unrealized_pnl)
+              )}>
+                {trade.unrealized_pnl == null
+                  ? "—"
+                  : `${trade.unrealized_pnl >= 0 ? "+" : ""}${fmt(trade.unrealized_pnl)}`}
+              </td>
               <td className="px-4 py-3">
                 <button
                   onClick={() => onClose(trade)}
