@@ -88,19 +88,19 @@ const GLOSSARY: GlossarySection[] = [
           "A golden cross occurs when the 50-day MA crosses above the 200-day MA — a bull signal. A death cross is the inverse: 50-day falls below 200-day — a bear signal. This platform suppresses all long recommendations on a stock showing a death cross, regardless of factor scores.",
       },
       {
-        term: "RSI — Relative Strength Index",
+        term: "Relative Strength Index (RSI)",
         definition:
           "RSI measures whether a stock has moved too far, too fast — between 0 and 100. Below 30 = oversold (potential bounce). Above 70 = overbought (potential pullback). Above 80 = this platform suppresses the recommendation. A healthy long entry is RSI between 45 and 70: trending but not extended.",
         formula: "RSI = 100 − (100 / (1 + avg_gain / avg_loss))  [14-day window]",
       },
       {
-        term: "MACD — Moving Average Convergence Divergence",
+        term: "Moving Average Convergence Divergence (MACD)",
         definition:
           "MACD measures trend momentum by tracking the gap between a 12-day and 26-day EMA of price. When the histogram is positive, short-term momentum is accelerating — bullish. When negative, momentum is decelerating. This platform uses MACD as an entry timing filter for positions already identified by the factor model.",
         formula: "MACD = EMA(12) − EMA(26)  |  Histogram = MACD − EMA(MACD, 9)",
       },
       {
-        term: "ATR — Average True Range",
+        term: "Average True Range (ATR)",
         definition:
           "ATR measures daily price volatility as the average size of a stock's price swings over 14 days, accounting for overnight gaps. ATR indicates magnitude, not direction. This platform uses ATR for stops (1.25× ATR below entry) and position sizing (same dollar risk regardless of stock volatility).",
         formula:
@@ -154,7 +154,7 @@ const GLOSSARY: GlossarySection[] = [
           "CPI measures how fast prices are rising. High inflation (>4% annualized) is negative for equities because it forces the Fed to raise rates, compresses margins, and erodes purchasing power. This platform reads CPIAUCSL from FRED and classifies inflation as low (<2%), moderate (2–4%), or high (>4%).",
       },
       {
-        term: "VIX — Fear Gauge",
+        term: "CBOE Volatility Index (VIX)",
         definition:
           "The market's expectation of S&P 500 volatility over the next 30 days, derived from options prices. It rises when investors buy protective puts. Key thresholds: <18 = calm, 18–25 = caution, 25–35 = risk-off, >35 = crisis. VIX above 35 has corresponded to the 2008 financial crisis and the March 2020 COVID crash.",
       },
@@ -311,7 +311,7 @@ const GLOSSARY: GlossarySection[] = [
           "The standard daily price record: Open (first trade), High (highest price), Low (lowest price), Close (last trade before 4pm ET), Volume (shares traded). All signal computation uses Adjusted Close, which back-adjusts historical prices for splits and dividends.",
       },
       {
-        term: "FRED — Federal Reserve Economic Data",
+        term: "Federal Reserve Economic Data (FRED)",
         definition:
           "A free public API from the Federal Reserve Bank of St. Louis with 800,000+ economic time series. This platform reads T10Y2Y (yield curve, daily), FEDFUNDS (fed funds rate, monthly), and CPIAUCSL (CPI, monthly).",
       },
