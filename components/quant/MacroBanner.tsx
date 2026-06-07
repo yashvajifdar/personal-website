@@ -59,7 +59,7 @@ export function MacroBanner({ macro }: MacroBannerProps) {
       <div className="flex flex-wrap gap-5 text-sm text-ink-muted">
         <span>
           <span className="font-medium text-ink">VIX</span>{" "}
-          {macro.vix.toFixed(1)}
+          {macro.vix != null ? macro.vix.toFixed(1) : "—"}
         </span>
         <span>
           <span className="font-medium text-ink">10Y–2Y</span>{" "}

@@ -80,7 +80,7 @@ export function SignalBreakdown({ recommendations }: SignalBreakdownProps) {
 
         const rsi = rsiLabel(sig.rsi);
         const macd =
-          sig.macd_histogram >= 0
+          sig.macd_hist >= 0
             ? { text: "Bullish", cls: "text-green-700" }
             : { text: "Bearish", cls: "text-red-600" };
         const vol =
@@ -102,7 +102,7 @@ export function SignalBreakdown({ recommendations }: SignalBreakdownProps) {
               </p>
               <div className="space-y-3">
                 <ScoreBar label="Momentum Rank" value={sig.momentum_rank} />
-                <ScoreBar label="Low-Vol Rank" value={sig.low_vol_rank} />
+                <ScoreBar label="Low-Vol Rank" value={sig.lowvol_rank} />
                 <ScoreBar label="Composite Score" value={sig.composite_score} />
               </div>
             </section>
@@ -144,7 +144,7 @@ export function SignalBreakdown({ recommendations }: SignalBreakdownProps) {
                     {macd.text}
                   </p>
                   <p className="text-xs text-ink-subtle">
-                    {sig.macd_histogram.toFixed(3)}
+                    {sig.macd_hist.toFixed(3)}
                   </p>
                 </div>
 
@@ -168,12 +168,12 @@ export function SignalBreakdown({ recommendations }: SignalBreakdownProps) {
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-xs text-center">
                 {(
                   [
-                    ["Entry", `$${sig.entry.toFixed(2)}`],
-                    ["Stop", `$${sig.stop.toFixed(2)}`],
-                    ["Target", `$${sig.target.toFixed(2)}`],
-                    ["R:R", sig.reward_risk.toFixed(1)],
-                    ["Shares", sig.suggested_shares.toString()],
-                    ["Size %", `${sig.size_pct.toFixed(1)}%`],
+                    ["Entry", `$${rec.risk_params.entry.toFixed(2)}`],
+                    ["Stop", `$${rec.risk_params.stop.toFixed(2)}`],
+                    ["Target", `$${rec.risk_params.target.toFixed(2)}`],
+                    ["R:R", rec.risk_params.reward_risk_ratio.toFixed(1)],
+                    ["Shares", rec.risk_params.suggested_shares.toString()],
+                    ["Size %", `${rec.risk_params.suggested_size_pct.toFixed(1)}%`],
                   ] as [string, string][]
                 ).map(([label, value]) => (
                   <div key={label} className="bg-surface-1 rounded-lg py-2 px-1">
@@ -185,9 +185,9 @@ export function SignalBreakdown({ recommendations }: SignalBreakdownProps) {
             </section>
 
             {/* Risks */}
-            {rec.risks && (
+            {rec.risks_to_thesis && (
               <p className="text-xs italic text-ink-muted leading-relaxed border-t border-surface-2 pt-3">
-                {rec.risks}
+                {rec.risks_to_thesis}
               </p>
             )}
           </article>

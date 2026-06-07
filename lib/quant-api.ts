@@ -15,35 +15,38 @@ export interface MacroSnapshot {
   fed_funds_rate: number;
 }
 
+export interface RiskParams {
+  entry: number;
+  stop: number;
+  target: number;
+  reward_risk_ratio: number;
+  atr: number;
+  suggested_shares: number;
+  suggested_size_pct: number;
+}
+
+export interface TickerSignals {
+  momentum_rank: number;    // 0–100
+  lowvol_rank: number;      // 0–100
+  composite_score: number;  // 0–100
+  close: number;
+  rsi: number;
+  ma50_above_ma200: boolean;
+  macd_hist: number;
+  volume_ratio: number;
+}
+
 export interface Recommendation {
   ticker: string;
   action: "BUY" | "AVOID" | "HOLD";
   conviction: number; // 1–5
   thesis: string;
-  entry: number;
-  stop: number;
-  target: number;
-  reward_risk: number;
+  risks_to_thesis?: string;
   signals?: TickerSignals;
-  risks?: string;
-}
-
-export interface TickerSignals {
-  ticker: string;
-  momentum_rank: number;    // 0–100
-  low_vol_rank: number;     // 0–100
-  composite_score: number;  // 0–100
-  rsi: number;
-  ma50_above_ma200: boolean;
-  macd_histogram: number;
-  volume_ratio: number;
-  entry: number;
-  stop: number;
-  target: number;
-  reward_risk: number;
-  suggested_shares: number;
-  size_pct: number;
-  risks?: string;
+  risk_params: RiskParams;
+  macro: MacroSnapshot;
+  as_of_date: string;
+  generated_at: string;
 }
 
 export interface RecommendResponse {

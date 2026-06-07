@@ -39,13 +39,14 @@ function ConvictionStars({ value }: { value: number }) {
 }
 
 function PriceGrid({ rec }: { rec: Recommendation }) {
+  const rp = rec.risk_params;
   return (
     <dl className="grid grid-cols-3 gap-2 text-center text-xs">
       {(
         [
-          ["Entry", rec.entry],
-          ["Stop", rec.stop],
-          ["Target", rec.target],
+          ["Entry", rp.entry],
+          ["Stop", rp.stop],
+          ["Target", rp.target],
         ] as [string, number][]
       ).map(([label, value]) => (
         <div key={label} className="bg-surface-1 rounded-lg px-2 py-2">
@@ -90,7 +91,7 @@ export function RecommendationCard({
         <span className="text-xs text-ink-subtle">
           R:R{" "}
           <span className="font-semibold text-ink">
-            {rec.reward_risk.toFixed(1)}
+            {rec.risk_params.reward_risk_ratio.toFixed(1)}
           </span>
         </span>
         <button

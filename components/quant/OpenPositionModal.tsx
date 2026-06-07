@@ -66,11 +66,11 @@ export function OpenPositionModal({
       await onConfirm({
         ticker: rec.ticker,
         action: rec.action,
-        entry_price: rec.entry,
-        stop: rec.stop,
-        target: rec.target,
-        reward_risk: rec.reward_risk,
-        shares: rec.signals?.suggested_shares ?? 1,
+        entry_price: rec.risk_params.entry,
+        stop: rec.risk_params.stop,
+        target: rec.risk_params.target,
+        reward_risk: rec.risk_params.reward_risk_ratio,
+        shares: rec.risk_params.suggested_shares,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to open position.");
@@ -95,11 +95,11 @@ export function OpenPositionModal({
           {(
             [
               ["Action", rec.action],
-              ["Entry", `$${rec.entry.toFixed(2)}`],
-              ["Stop", `$${rec.stop.toFixed(2)}`],
-              ["Target", `$${rec.target.toFixed(2)}`],
-              ["R:R", rec.reward_risk.toFixed(1)],
-              ["Shares", (rec.signals?.suggested_shares ?? 1).toString()],
+              ["Entry", `$${rec.risk_params.entry.toFixed(2)}`],
+              ["Stop", `$${rec.risk_params.stop.toFixed(2)}`],
+              ["Target", `$${rec.risk_params.target.toFixed(2)}`],
+              ["R:R", rec.risk_params.reward_risk_ratio.toFixed(1)],
+              ["Shares", rec.risk_params.suggested_shares.toString()],
             ] as [string, string][]
           ).map(([label, value]) => (
             <div key={label} className="bg-surface-1 rounded-lg py-2 px-3">
