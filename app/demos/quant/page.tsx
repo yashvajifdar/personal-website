@@ -154,7 +154,12 @@ export function QuantDashboardPage() {
             error={error}
             note={note}
             onRefresh={loadRecommendations}
-            onOpenPosition={setPendingRec}
+            onOpenPosition={(rec) => {
+            // Re-read localStorage in case the portfolio was created after page mount
+            const freshId = localStorage.getItem(STORAGE_KEY);
+            if (freshId !== portfolioId) setPortfolioId(freshId);
+            setPendingRec(rec);
+          }}
           />
         )}
 
