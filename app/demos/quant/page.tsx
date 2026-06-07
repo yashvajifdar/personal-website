@@ -21,6 +21,7 @@ import { SignalBreakdown } from "@/components/quant/SignalBreakdown";
 import { PortfolioView } from "@/components/quant/PortfolioView";
 import { OpenPositionModal } from "@/components/quant/OpenPositionModal";
 import { GlossaryTab } from "@/components/quant/GlossaryTab";
+import { UniverseTab } from "@/components/quant/UniverseTab";
 
 const STORAGE_KEY = "quant_portfolio_id";
 const DEFAULT_QUESTION = "What should I buy this week?";
@@ -175,23 +176,6 @@ function TodayTab({
       <p className="text-xs text-ink-subtle text-center">
         Not financial advice. For paper trading and educational purposes only.
       </p>
-    </div>
-  );
-}
-
-// ── Universe tab (placeholder) ────────────────────────────────────────────────
-
-function UniverseTab() {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 text-center space-y-3">
-      <p className="text-base font-semibold text-ink">Signal Scanner</p>
-      <p className="text-sm text-ink-muted max-w-sm">
-        Signal scanner coming soon — will show all 503 S&amp;P 500 tickers ranked
-        by composite factor score.
-      </p>
-      <span className="text-xs text-ink-subtle">
-        We&apos;ll wire the data endpoint in a follow-up.
-      </span>
     </div>
   );
 }

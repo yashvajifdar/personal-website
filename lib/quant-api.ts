@@ -94,6 +94,21 @@ export interface PortfolioPerformance {
 
 export type ExitReason = "HIT_TARGET" | "HIT_STOP" | "MANUAL";
 
+export interface SignalTicker {
+  ticker: string;
+  company_name: string | null;
+  sector: string | null;
+  composite_score: number;
+  momentum_rank: number;
+  lowvol_rank: number;
+}
+
+export interface SignalsResponse {
+  tickers: SignalTicker[];
+  count: number;
+  as_of_date: string | null;
+}
+
 // ── API functions ─────────────────────────────────────────────────────────────
 
 /**
@@ -185,6 +200,25 @@ export async function openTrade(
   }
 
   return res.json() as Promise<Portfolio>;
+}
+
+/**
+ * Fetch all 503 S&P 500 tickers ranked by composite factor score.
+ * Results are cached on the server for 4 hours.
+ */
+export async function fetchSignals(): Promise<SignalsResponse> {
+  const res = await fetch(`${QUANT_API_URL}/signals`);
+
+  if (!res.ok) {
+    const body: unknown = await res.json().catch(() => ({}));
+    const detail =
+      typeof body === "object" && body !== null && "detail" in body
+        ? String((body as Record<string, unknown>).detail)
+        : `Server error ${res.status}`;
+    throw new Error(detail);
+  }
+
+  return res.json() as Promise<SignalsResponse>;
 }
 
 /**
