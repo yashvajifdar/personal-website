@@ -30,6 +30,13 @@ const config: Config = {
           hover: "#1740a8",
           subtle: "#eff4ff",
         },
+        // Quant dashboard palette — teal, kept separate from site accent
+        quant: {
+          DEFAULT:  "#0d9488", // teal-600 — primary interactive
+          hover:    "#0f766e", // teal-700
+          subtle:   "#f0fdfa", // teal-50 — card highlights, subtle fills
+          muted:    "#99f6e4", // teal-200 — progress bar fills
+        },
       },
       maxWidth: {
         content: "720px",
