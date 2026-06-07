@@ -63,6 +63,7 @@ const RecommendResponseSchema = z.object({
   macro: MacroSnapshotSchema,
   query: z.string().optional(),
   generated_at: z.string().optional(),
+  note: z.string().nullable().optional(),
 });
 
 const PortfolioRowSchema = z.object({
