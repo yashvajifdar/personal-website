@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/cn";
-import { createPortfolio, fetchPortfolio, closeTrade } from "@/lib/quant-api";
-import type { PortfolioResponse, Trade, ExitReason } from "@/lib/quant-api";
+import { createPortfolio, fetchPortfolio, closeTrade, reviewPortfolio } from "@/lib/quant-api";
+import type { PortfolioResponse, Trade, ExitReason, PortfolioReview } from "@/lib/quant-api";
 import { CloseTradeModal } from "@/components/quant/CloseTradeModal";
+import { PositionReviewPanel } from "@/components/quant/PositionReviewPanel";
 
 const STORAGE_KEY = "quant_portfolio_id";
 const ACCOUNT_VALUE = 100_000;
@@ -296,6 +297,9 @@ export function PortfolioView() {
   const [tradeToClose, setTradeToClose] = useState<Trade | null>(null);
   const [portfolioLink, setPortfolioLink] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [review, setReview] = useState<PortfolioReview | null>(null);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   const portfolioId = portfolio?.portfolio.id ?? null;
 
@@ -339,6 +343,19 @@ export function PortfolioView() {
     setTradeToClose(null);
   }
 
+  async function handleReview() {
+    if (!portfolioId) return;
+    setReviewLoading(true);
+    setReviewError(null);
+    try {
+      setReview(await reviewPortfolio(portfolioId));
+    } catch (err) {
+      setReviewError(err instanceof Error ? err.message : "Review failed");
+    } finally {
+      setReviewLoading(false);
+    }
+  }
+
   async function handleCopyLink() {
     if (!portfolioLink) return;
     await navigator.clipboard.writeText(portfolioLink);
@@ -372,6 +389,55 @@ export function PortfolioView() {
 
       {/* Performance */}
       <PerformanceStrip portfolio={portfolio} />
+
+      {/* Review positions */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-semibold text-ink-subtle uppercase tracking-wide">
+            AI Position Review
+          </p>
+          {portfolio.open_trades.length > 0 && (
+            <button
+              onClick={handleReview}
+              disabled={reviewLoading}
+              className="text-xs font-medium px-4 py-2 bg-quant text-white rounded-xl hover:bg-quant-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {reviewLoading ? "Analysing…" : review ? "Re-analyse" : "Review Positions"}
+            </button>
+          )}
+        </div>
+
+        {reviewLoading && (
+          <div className="space-y-3">
+            {[0, 1].map((i) => (
+              <div key={i} className="h-32 bg-surface-2 rounded-2xl animate-pulse" />
+            ))}
+            <p className="text-xs text-ink-subtle text-center">
+              Running signals on your positions… ~30 seconds
+            </p>
+          </div>
+        )}
+
+        {!reviewLoading && reviewError && (
+          <div className="bg-surface-1 border border-surface-3 rounded-xl px-4 py-3 text-sm text-ink-muted">
+            {reviewError}
+          </div>
+        )}
+
+        {!reviewLoading && review && (
+          <PositionReviewPanel
+            review={review}
+            generatedAt={review.generated_at ?? null}
+          />
+        )}
+
+        {!reviewLoading && !review && !reviewError && portfolio.open_trades.length > 0 && (
+          <p className="text-sm text-ink-subtle py-4 text-center">
+            Click Review Positions to get HOLD / ADD / TRIM / EXIT signals on each open trade,
+            plus hedge and diversifier suggestions.
+          </p>
+        )}
+      </section>
 
       {/* Open positions */}
       <section>

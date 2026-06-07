@@ -115,6 +115,34 @@ const PortfolioResponseSchema = z.object({
   performance: PortfolioPerformanceSchema,
 });
 
+const HedgeSuggestionSchema = z.object({
+  ticker: z.string(),
+  rationale: z.string(),
+});
+
+const PositionReviewSchema = z.object({
+  ticker: z.string(),
+  verdict: z.enum(["HOLD", "ADD", "TRIM", "EXIT"]),
+  conviction: z.number().int().min(1).max(5),
+  signal_summary: z.string(),
+  updated_thesis: z.string(),
+  risk_note: z.string(),
+});
+
+const PortfolioInsightsSchema = z.object({
+  regime_impact: z.string(),
+  concentration_risk: z.string(),
+  hedge_suggestions: z.array(HedgeSuggestionSchema),
+  diversifier_suggestions: z.array(HedgeSuggestionSchema),
+});
+
+const PortfolioReviewSchema = z.object({
+  position_reviews: z.array(PositionReviewSchema),
+  portfolio_insights: PortfolioInsightsSchema,
+  macro: MacroSnapshotSchema,
+  generated_at: z.string().optional(),
+});
+
 const SignalTickerSchema = z.object({
   ticker: z.string(),
   company_name: z.string().nullable(),
@@ -146,6 +174,10 @@ export type PortfolioResponse = z.infer<typeof PortfolioResponseSchema>;
 export type SignalTicker = z.infer<typeof SignalTickerSchema>;
 export type SignalsResponse = z.infer<typeof SignalsResponseSchema>;
 export type ExitReason = "HIT_TARGET" | "HIT_STOP" | "MANUAL";
+export type PositionReview = z.infer<typeof PositionReviewSchema>;
+export type PortfolioInsights = z.infer<typeof PortfolioInsightsSchema>;
+export type HedgeSuggestion = z.infer<typeof HedgeSuggestionSchema>;
+export type PortfolioReview = z.infer<typeof PortfolioReviewSchema>;
 
 // Explicit payload type for openTrade — separate from the Trade response shape.
 export interface OpenTradePayload {
@@ -229,6 +261,14 @@ export async function closeTrade(
   );
   if (!res.ok) throw new Error(await extractError(res));
   return res.json() as Promise<{ trade_id: string; realized_pnl: number }>;
+}
+
+export async function reviewPortfolio(portfolioId: string): Promise<PortfolioReview> {
+  const res = await fetch(`${QUANT_API_URL}/portfolio/${portfolioId}/review`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error(await extractError(res));
+  return PortfolioReviewSchema.parse(await res.json());
 }
 
 export async function fetchSignals(): Promise<SignalsResponse> {
