@@ -90,7 +90,9 @@ function PickCard({ rec, onOpenPosition }: PickCardProps) {
           <div className="space-y-2.5">
             <p className="text-xs font-semibold text-ink-subtle uppercase tracking-wide">Factor Scores</p>
             <ScoreBar label="Momentum Rank" value={sig.momentum_rank ?? 0} />
+            {sig.quality_score != null && <ScoreBar label="Quality Score"  value={sig.quality_score} />}
             <ScoreBar label="Low-Vol Rank"  value={sig.lowvol_rank ?? 0} />
+            {sig.value_score != null && <ScoreBar label="Value Score" value={sig.value_score} />}
             <ScoreBar label="Composite"     value={sig.composite_score ?? 0} />
           </div>
 

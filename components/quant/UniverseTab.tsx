@@ -5,7 +5,7 @@ import { fetchSignals } from "@/lib/quant-api";
 import type { SignalTicker } from "@/lib/quant-api";
 import { cn } from "@/lib/cn";
 
-type SortKey = "composite_score" | "momentum_rank" | "lowvol_rank";
+type SortKey = "composite_score" | "momentum_rank" | "lowvol_rank" | "quality_score" | "value_score";
 
 const SECTOR_COLORS: Record<string, string> = {
   "Technology":             "bg-blue-100 text-blue-700",
@@ -91,7 +91,7 @@ export function UniverseTab() {
           sectorFilter === "All" || t.sector === sectorFilter;
         return matchSearch && matchSector;
       })
-      .sort((a, b) => b[sortKey] - a[sortKey]);
+      .sort((a, b) => (b[sortKey] ?? 0) - (a[sortKey] ?? 0));
   }, [tickers, search, sortKey, sectorFilter]);
 
   if (loading) {
@@ -137,10 +137,12 @@ export function UniverseTab() {
             <p className="text-xs text-ink-subtle mt-0.5">As of {asOfDate}</p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <SortButton label="Composite" active={sortKey === "composite_score"} onClick={() => setSortKey("composite_score")} />
-          <SortButton label="Momentum" active={sortKey === "momentum_rank"}    onClick={() => setSortKey("momentum_rank")} />
-          <SortButton label="Low Vol"  active={sortKey === "lowvol_rank"}      onClick={() => setSortKey("lowvol_rank")} />
+          <SortButton label="Momentum"  active={sortKey === "momentum_rank"}   onClick={() => setSortKey("momentum_rank")} />
+          <SortButton label="Quality"   active={sortKey === "quality_score"}   onClick={() => setSortKey("quality_score")} />
+          <SortButton label="Low Vol"   active={sortKey === "lowvol_rank"}     onClick={() => setSortKey("lowvol_rank")} />
+          <SortButton label="Value"     active={sortKey === "value_score"}     onClick={() => setSortKey("value_score")} />
         </div>
       </div>
 
@@ -174,7 +176,9 @@ export function UniverseTab() {
               <th className="text-left px-4 py-3 hidden sm:table-cell">Sector</th>
               <th className="text-right px-4 py-3">Composite</th>
               <th className="text-right px-4 py-3 hidden md:table-cell">Momentum</th>
+              <th className="text-right px-4 py-3 hidden lg:table-cell">Quality</th>
               <th className="text-right px-4 py-3 hidden md:table-cell">Low Vol</th>
+              <th className="text-right px-4 py-3 hidden lg:table-cell">Value</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-surface-2">
@@ -202,8 +206,14 @@ export function UniverseTab() {
                 <td className="px-4 py-3 text-right hidden md:table-cell">
                   <ScorePill value={t.momentum_rank} />
                 </td>
+                <td className="px-4 py-3 text-right hidden lg:table-cell">
+                  {t.quality_score != null ? <ScorePill value={t.quality_score} /> : <span className="text-ink-subtle text-xs">—</span>}
+                </td>
                 <td className="px-4 py-3 text-right hidden md:table-cell">
                   <ScorePill value={t.lowvol_rank} />
+                </td>
+                <td className="px-4 py-3 text-right hidden lg:table-cell">
+                  {t.value_score != null ? <ScorePill value={t.value_score} /> : <span className="text-ink-subtle text-xs">—</span>}
                 </td>
               </tr>
             ))}

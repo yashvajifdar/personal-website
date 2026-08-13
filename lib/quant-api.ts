@@ -36,6 +36,8 @@ const TickerSignalsSchema = z.object({
   momentum_rank: z.number(),
   lowvol_rank: z.number(),
   composite_score: z.number(),
+  value_score: z.number().nullable().optional(),
+  quality_score: z.number().nullable().optional(),
   close: z.number(),
   rsi: z.number(),
   ma50_above_ma200: z.boolean(),
@@ -150,6 +152,8 @@ const SignalTickerSchema = z.object({
   composite_score: z.number(),
   momentum_rank: z.number(),
   lowvol_rank: z.number(),
+  value_score: z.number().nullable(),
+  quality_score: z.number().nullable(),
 });
 
 const SignalsResponseSchema = z.object({
