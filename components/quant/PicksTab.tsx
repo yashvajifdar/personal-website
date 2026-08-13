@@ -162,6 +162,32 @@ function PickCard({ rec, onOpenPosition }: PickCardProps) {
   );
 }
 
+// ── Disclaimer banner ─────────────────────────────────────────────────────────
+
+function DisclaimerBanner() {
+  return (
+    <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 space-y-1">
+      <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide">
+        Not financial advice &mdash; paper trading only
+      </p>
+      <p className="text-xs text-amber-700 leading-relaxed">
+        All positions are simulated with no real capital. Signal scores are based on the{" "}
+        <strong>current S&amp;P 500 constituent list</strong> — companies that have been
+        removed from the index (bankruptcies, acquisitions, delistings) are absent from
+        the universe. Any historical performance numbers on this platform overstate returns
+        due to this <strong>survivorship bias</strong>.
+      </p>
+      <p className="text-xs text-amber-700 leading-relaxed">
+        Signals are generated using the <strong>prior trading day&apos;s close</strong>.
+        Paper entries are logged at the <strong>current day&apos;s close</strong>, after
+        the signal was generated. No same-day intraday prices are used (no{" "}
+        <strong>lookahead bias</strong>), but results still may not reflect real-world
+        execution costs, slippage, or liquidity constraints.
+      </p>
+    </div>
+  );
+}
+
 // ── Tab ───────────────────────────────────────────────────────────────────────
 
 interface PicksTabProps {
@@ -190,6 +216,9 @@ export function PicksTab({
       {!macro && loading && (
         <div className="h-16 bg-surface-2 rounded-xl animate-pulse" />
       )}
+
+      {/* Bias + disclaimer notice */}
+      <DisclaimerBanner />
 
       {/* Loading skeletons */}
       {loading && recommendations.length === 0 && (
@@ -243,7 +272,6 @@ export function PicksTab({
           {loading ? "Loading…" : "Refresh Picks"}
         </button>
         <p className="text-xs text-ink-subtle">Takes ~30 seconds — runs 3 signal tools + AI synthesis</p>
-        <p className="text-xs text-ink-subtle">Not financial advice. Paper trading only.</p>
       </div>
     </div>
   );

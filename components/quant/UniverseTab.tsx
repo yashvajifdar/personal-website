@@ -114,6 +114,19 @@ export function UniverseTab() {
 
   return (
     <div className="space-y-4">
+      {/* Bias disclaimer */}
+      <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-3">
+        <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-1">
+          Survivorship bias notice
+        </p>
+        <p className="text-xs text-amber-700 leading-relaxed">
+          Rankings shown here use the <strong>current S&amp;P 500 constituent list</strong>. Companies that have
+          been removed from the index (bankruptcies, acquisitions, delistings) are absent. Signal
+          scores and any historical comparisons overstate returns relative to a true point-in-time
+          universe. Not financial advice &mdash; paper trading only.
+        </p>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>

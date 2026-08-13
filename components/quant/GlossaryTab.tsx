@@ -53,8 +53,8 @@ const GLOSSARY: GlossarySection[] = [
       {
         term: "Composite Score",
         definition:
-          "A single number combining momentum rank (60% weight) and low-volatility rank (40% weight). A composite score of 88 means the stock ranks better than 88% of the S&P 500. The 60/40 split reflects that momentum contributes more alpha historically while low-vol adds defensive stability.",
-        formula: "composite = 0.6 × momentum_rank + 0.4 × lowvol_rank",
+          "A single number combining all four factor ranks: momentum (40%), quality (25%), low-volatility (20%), and value (15%). A composite score of 88 means the stock ranks better than 88% of the S&P 500 on the combined signal. Momentum leads because it contributes the most cross-sectional alpha historically. Quality is second because it reduces momentum-crash risk and adds orthogonal alpha. Low-vol supports the platform's drawdown target. Value gets the smallest weight given a decade of underperformance relative to its historical premium.",
+        formula: "composite = 0.40 × momentum_rank + 0.25 × quality_score + 0.20 × lowvol_rank + 0.15 × value_score",
       },
       {
         term: "Alpha",
